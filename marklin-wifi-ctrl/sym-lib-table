@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "marklin-wifi-ctrl")(type "KiCad")(uri "${KIPRJMOD}/marklin-wifi-ctrl.kicad_sym")(options "")(descr "Project-specific imported symbols"))
+)

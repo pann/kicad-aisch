@@ -1,0 +1,1112 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "09ac1fc8-d7b7-450f-806c-6e384a19c1cf")
+	(paper "A4")
+	(title_block
+		(title "Zero-Crossing Detector")
+		(date "2026-03-05")
+		(rev "0.1")
+		(company "ZID AB")
+		(comment 1 "Author: PA Nilsson")
+		(comment 2 "Block 3: Full-wave AC zero-cross via EL357N")
+	)
+	(lib_symbols
+		(symbol "marklin-wifi-ctrl:EL357N(C)(TA)-G"
+		    (exclude_from_sim no)
+		  (in_bom yes)
+		    (on_board yes)
+		    (property "Reference" "U"
+		      (at 0 7.62 0)
+		      (effects (font (size 1.27 1.27)))
+		    )
+		    (property "Value" "EL357N(C)(TA)-G"
+		      (at 0 -7.62 0)
+		      (effects (font (size 1.27 1.27)))
+		    )
+		    (property "Footprint" "marklin-wifi-ctrl:OPTO-SMD-4_L4.4-W4.1-P2.54-LS7.0-TL"
+		      (at 0 -10.16 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (property "Datasheet" "https://lcsc.com/product-detail/SMD-Optocouplers_EL357N-C-TA-G_C29981.html"
+		      (at 0 -12.70 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (property "LCSC Part" "C29981"
+		      (at 0 -15.24 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (symbol "EL357N(C)(TA)-G_0_1"
+		      (rectangle
+		        (start -6.35 4.32)
+		        (end 6.35 -4.32)
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy 0.76 -2.03) (xy 0.25 -1.02) (xy -0.25 -1.52) (xy 0.76 -2.03)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy 1.52 -1.02) (xy 1.02 -0.00) (xy 0.51 -0.51) (xy 1.52 -1.02)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy -4.57 1.27) (xy -3.05 -1.27) (xy -1.27 1.27) (xy -4.57 1.27)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy 6.35 2.54) (xy 3.81 0.76)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 3.81 -0.76) (xy 6.35 -2.54)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 3.81 2.29) (xy 3.81 -2.29)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy -1.02 -0.25) (xy 0.76 -2.03)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy -0.25 0.76) (xy 1.52 -1.02)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy -1.02 -1.27) (xy -5.08 -1.27)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy -6.35 2.54) (xy -3.05 2.54) (xy -3.05 -2.54) (xy -6.35 -2.54)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 6.35 -2.54) (xy 5.59 -1.27) (xy 4.83 -2.29) (xy 6.35 -2.54)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (pin unspecified line
+		        (at -11.43 2.54 0)
+		        (length 5.08)
+		        (name "AN" (effects (font (size 1.27 1.27))))
+		        (number "1" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at -11.43 -2.54 0)
+		        (length 5.08)
+		        (name "CAT" (effects (font (size 1.27 1.27))))
+		        (number "2" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at 11.43 -2.54 180)
+		        (length 5.08)
+		        (name "EM" (effects (font (size 1.27 1.27))))
+		        (number "3" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at 11.43 2.54 180)
+		        (length 5.08)
+		        (name "COL" (effects (font (size 1.27 1.27))))
+		        (number "4" (effects (font (size 1.27 1.27))))
+		      )
+		    )
+		  (embedded_fonts no)
+		)
+		(symbol "Diode:1N4148WS"
+				(property "Reference" "D"
+					(at 0 2.54 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Value" "1N4148WS"
+					(at 0 -2.54 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" "Diode_SMD:D_SOD-323"
+					(at 0 -4.445 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "https://www.vishay.com/docs/85751/1n4148ws.pdf"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "75V 0.15A Fast switching Diode, SOD-323"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "diode"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_fp_filters" "D*SOD?323*"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+		(symbol "1N4148WS_0_1"
+					(polyline
+						(pts
+							(xy -1.27 1.27) (xy -1.27 -1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 1.27 0) (xy -1.27 0)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+		(symbol "1N4148WS_1_1"
+					(pin passive line
+						(at -3.81 0 0)
+						(length 2.54)
+						(name "K"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 3.81 0 180)
+						(length 2.54)
+						(name "A"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "2"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+		  (embedded_fonts no)
+		)
+		(symbol "Device:R"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "R"
+					(at 2.032 0 90)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Value" "R"
+					(at 0 0 90)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at -1.778 0 90)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "~"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Resistor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "R res resistor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_fp_filters" "R_*"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "R_0_1"
+					(rectangle
+						(start -1.016 -2.54)
+						(end 1.016 2.54)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "R_1_1"
+					(pin passive line
+						(at 0 3.81 270)
+						(length 1.27)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 0 -3.81 90)
+						(length 1.27)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "2"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "power:GND"
+				(power)
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+					(hide yes)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "#PWR"
+					(at 0 -6.35 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Value" "GND"
+					(at 0 -3.81 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "global power"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "GND_0_1"
+					(polyline
+						(pts
+							(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "GND_1_1"
+					(pin power_in line
+						(at 0 0 270)
+						(length 0)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "power:+3V3"
+				(power)
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+					(hide yes)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "#PWR"
+					(at 0 -3.81 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Value" "+3V3"
+					(at 0 3.556 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Power symbol creates a global label with name \"+3V3\""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "global power"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "+3V3_0_1"
+					(polyline
+						(pts
+							(xy -0.762 1.27) (xy 0 2.54)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 0 2.54) (xy 0.762 1.27)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 0 0) (xy 0 2.54)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "+3V3_1_1"
+					(pin power_in line
+						(at 0 0 90)
+						(length 0)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+	)
+	(symbol
+		(lib_id "marklin-wifi-ctrl:EL357N(C)(TA)-G")
+		(at 139.7 90.17 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5224cc79-991a-4eb8-b198-1a189d129568")
+		(property "Reference" "U500"
+			(at 139.7 86.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "EL357N"
+			(at 139.7 94.17 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "marklin-wifi-ctrl:OPTO-SMD-4_L4.4-W4.1-P2.54-LS7.0-TL"
+			(at 139.7 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 139.7 90.17 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "f4458fac-3db9-4a74-b5ea-03bde3720caf"))
+		(pin "2" (uuid "5dc567a0-93ea-413e-9832-fbe6136da481"))
+		(pin "3" (uuid "2f4d0772-6ba3-4e09-ba26-6bb2f88c5d53"))
+		(pin "4" (uuid "25e11298-56ea-4847-8629-36424e3c8c8f"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "U500")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 30.48 74.93 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "cfb120af-5f00-479d-a784-122ce6efefba")
+		(property "Reference" "R500"
+			(at 30.48 70.93 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "3.3K/1W"
+			(at 30.48 78.93 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 30.48 74.93 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 30.48 74.93 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "0f231ad8-9586-412f-b066-9620a9efefe6"))
+		(pin "2" (uuid "a7191ed9-c677-4049-b21c-7d81db6e3dae"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "R500")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 44.45 74.93 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b7bf22d0-f815-4c8f-ab3e-ebf75ceb4a52")
+		(property "Reference" "R501"
+			(at 44.45 70.93 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "3.3K/1W"
+			(at 44.45 78.93 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 44.45 74.93 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 44.45 74.93 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "7a1f71df-5af9-4351-b6a7-393183a7a4b2"))
+		(pin "2" (uuid "f53b73dc-b2cd-4d22-a199-e07afa42ea2c"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "R501")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 34.29 74.93) (xy 40.64 74.93))
+		(stroke (width 0) (type solid))
+		(uuid "574848b1-bdd4-4eb5-bdd3-e9af41463991")
+	)
+	(wire
+		(pts (xy 19.05 74.93) (xy 26.67 74.93))
+		(stroke (width 0) (type solid))
+		(uuid "efcc51d5-477d-463b-98ee-098bd944fbba")
+	)
+	(hierarchical_label "AC_L"
+		(shape input)
+		(at 19.05 74.93 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "b21f3bf0-a83b-4504-b907-2bce6c6c8a57")
+	)
+	(wire
+		(pts (xy 48.26 74.93) (xy 54.61 74.93))
+		(stroke (width 0) (type solid))
+		(uuid "7e8ea230-b9e3-48aa-962e-48c6d3c10b6a")
+	)
+	(wire
+		(pts (xy 46.99 105.41) (xy 54.61 105.41))
+		(stroke (width 0) (type solid))
+		(uuid "2f489d3a-3030-4b6e-bd56-b2372a2069cb")
+	)
+	(hierarchical_label "AC_N"
+		(shape input)
+		(at 46.99 105.41 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "546b8d00-73c0-4b6e-846a-4461936afe9b")
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 62.23 66.04 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "15ae7eaa-912e-4f54-b18c-790ede315f20")
+		(property "Reference" "D500"
+			(at 62.23 62.040000000000006 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 62.23 70.04 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 62.23 66.04 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 62.23 66.04 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "6258671b-7b7e-4e6d-9f06-f4f7322345a2"))
+		(pin "2" (uuid "1a78efcf-49f9-41d6-851e-8ab61e5e693d"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "D500")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 62.23 62.23) (xy 62.23 58.42))
+		(stroke (width 0) (type solid))
+		(uuid "f3cb1c62-ee8d-478e-94a0-b89a8e9596bb")
+	)
+	(wire
+		(pts (xy 62.23 69.85) (xy 62.23 74.93))
+		(stroke (width 0) (type solid))
+		(uuid "de07da60-009e-425e-adc4-7d88c3c7a0f0")
+	)
+	(wire
+		(pts (xy 62.23 74.93) (xy 54.61 74.93))
+		(stroke (width 0) (type solid))
+		(uuid "ff5818f9-b62d-476a-b95a-10c9b5bc5fcb")
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 62.23 99.06 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f7e80237-5e0f-4224-9481-ef149d5ea3c2")
+		(property "Reference" "D503"
+			(at 62.23 95.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 62.23 103.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 62.23 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 62.23 99.06 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "344d3029-f288-4f9f-8bb1-bf42b8dcd5ef"))
+		(pin "2" (uuid "70dfc857-bfb9-45bf-9b13-6a328a6167bf"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "D503")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 62.23 95.25) (xy 62.23 69.85))
+		(stroke (width 0) (type solid))
+		(uuid "fec58652-d749-44be-baf7-c906b7e371a5")
+	)
+	(wire
+		(pts (xy 62.23 102.87) (xy 62.23 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "d5b597dc-ba00-484f-9488-51dc693cf128")
+	)
+	(junction
+		(at 62.23 74.93)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "74e79bb1-5904-49fd-b9e5-86de1858e010")
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 91.44 81.28 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "0b569088-b2b3-4656-8f8e-fe9b76147b2b")
+		(property "Reference" "D502"
+			(at 91.44 77.28 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 91.44 85.28 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 91.44 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 91.44 81.28 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "fdf995f9-1e5a-46b1-9a64-fe8008bdf2e7"))
+		(pin "2" (uuid "77778618-7504-4785-bf51-b0f636c234fb"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "D502")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 91.44 77.47) (xy 91.44 58.42))
+		(stroke (width 0) (type solid))
+		(uuid "0394b472-3af3-4853-8851-91eaa9c60c17")
+	)
+	(wire
+		(pts (xy 91.44 85.09) (xy 91.44 105.41))
+		(stroke (width 0) (type solid))
+		(uuid "d137cf03-e10f-4962-93ac-5e9101052b63")
+	)
+	(wire
+		(pts (xy 91.44 105.41) (xy 54.61 105.41))
+		(stroke (width 0) (type solid))
+		(uuid "98d57888-596e-4106-8ca7-b2c63ee011a5")
+	)
+	(symbol
+		(lib_id "Diode:1N4148WS")
+		(at 91.44 113.03 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "aa431d24-2884-45de-8fdf-ed0e82ab6331")
+		(property "Reference" "D501"
+			(at 91.44 109.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "1N4148WS"
+			(at 91.44 117.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-323"
+			(at 91.44 113.03 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 91.44 113.03 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "888a923f-a665-4339-a534-11c9fa96ed9a"))
+		(pin "2" (uuid "f0af061f-f695-4b21-8e66-4a9e87952bdb"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "D501")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 91.44 109.22) (xy 91.44 105.41))
+		(stroke (width 0) (type solid))
+		(uuid "23027d12-e6ea-4832-a68f-580b4135e521")
+	)
+	(wire
+		(pts (xy 91.44 116.84) (xy 91.44 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "fa9069c8-4c35-4d07-adc1-ea68e928e7d1")
+	)
+	(junction
+		(at 91.44 105.41)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "62b0db29-7195-4131-86b3-09f23c3dad1a")
+	)
+	(wire
+		(pts (xy 62.23 58.42) (xy 91.44 58.42))
+		(stroke (width 0) (type solid))
+		(uuid "d54882e0-31cd-4b5b-8b65-12a02fb92e27")
+	)
+	(wire
+		(pts (xy 91.44 58.42) (xy 128.27 58.42))
+		(stroke (width 0) (type solid))
+		(uuid "b7c40583-c2a5-41dc-bbd0-df8f8f81e84c")
+	)
+	(wire
+		(pts (xy 128.27 58.42) (xy 128.27 87.63))
+		(stroke (width 0) (type solid))
+		(uuid "a1c507be-595e-443e-8ef7-c4347083b12f")
+	)
+	(junction
+		(at 91.44 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ecd8fb6e-159a-4abb-9d4c-23202980ad3c")
+	)
+	(wire
+		(pts (xy 62.23 121.92) (xy 91.44 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "ab7f3ba7-7531-4120-8bf2-f6a982f12936")
+	)
+	(wire
+		(pts (xy 91.44 121.92) (xy 128.27 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "a37554a8-7aca-4499-9adf-e8ea9f46e6f9")
+	)
+	(wire
+		(pts (xy 128.27 121.92) (xy 128.27 92.71))
+		(stroke (width 0) (type solid))
+		(uuid "f67605c2-3845-47be-a6bf-b983f352b3b5")
+	)
+	(junction
+		(at 91.44 121.92)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "98e584b2-3f70-43ea-a715-c55d1bba4c47")
+	)
+	(wire
+		(pts (xy 151.13 92.71) (xy 151.13 100.33))
+		(stroke (width 0) (type solid))
+		(uuid "2a36f261-f8cd-4c06-929b-e8cdfb8fdc62")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 151.13 100.33 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "c5e457c8-5a6e-4350-9415-2d7a2fe72eb4")
+		(property "Reference" "#PWR0500"
+			(at 151.13 98.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "GND"
+			(at 151.13 102.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 151.13 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" ""
+			(at 151.13 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "91091844-a6ff-49f0-9453-70eeb4134265"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "#PWR0500")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 170.18 80.01 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "90719ba2-7e4b-40f4-8d33-b0d2caa1fb94")
+		(property "Reference" "R502"
+			(at 170.18 76.01 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10K"
+			(at 170.18 84.01 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 170.18 80.01 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 170.18 80.01 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "3af424cb-1947-463b-a667-2020543f8c9d"))
+		(pin "2" (uuid "3fb43e1a-42f5-4399-be58-397776bf0611"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "R502")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 170.18 76.2) (xy 170.18 68.58))
+		(stroke (width 0) (type solid))
+		(uuid "0888750b-fb6d-430a-b34f-75bfb813b7fa")
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 170.18 68.58 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "7e72fe64-2991-4f55-99b5-14bbf04cb93f")
+		(property "Reference" "#PWR0501"
+			(at 170.18 66.58 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "+3V3"
+			(at 170.18 70.58 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 170.18 68.58 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" ""
+			(at 170.18 68.58 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "df3951b1-aaed-4cd1-a829-02281185bc53"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+					(reference "#PWR0501")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 151.13 87.63) (xy 170.18 87.63))
+		(stroke (width 0) (type solid))
+		(uuid "f1118a38-2091-402c-a6a0-10216fda5ed6")
+	)
+	(wire
+		(pts (xy 170.18 83.82) (xy 170.18 87.63))
+		(stroke (width 0) (type solid))
+		(uuid "09810e8f-34cf-4086-b6e7-8ded0a035772")
+	)
+	(junction
+		(at 170.18 87.63)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a842f1e6-9cd1-46bb-81af-edafabaee55e")
+	)
+	(wire
+		(pts (xy 170.18 87.63) (xy 177.8 87.63))
+		(stroke (width 0) (type solid))
+		(uuid "95f0a454-bafc-4305-8eb7-ed770e1682f5")
+	)
+	(hierarchical_label "ZC_PULSE"
+		(shape output)
+		(at 177.8 87.63 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "94679242-77db-4316-803c-4e25c10ba283")
+	)
+	(sheet_instances
+		(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/12425cfa-6061-40dc-bca8-eb9456dd8125"
+			(page "5")
+		)
+	)
+	(embedded_fonts no)
+)

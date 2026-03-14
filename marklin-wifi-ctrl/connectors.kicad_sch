@@ -1,0 +1,348 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "e7d4416b-523d-41c2-a3ba-90336c47cd47")
+	(paper "A4")
+	(title_block
+		(title "Connectors")
+		(date "2026-03-10")
+		(rev "0.1")
+		(company "ZID AB")
+		(comment 1 "Author: PA Nilsson")
+		(comment 2 "Block 9: Track input and motor output connectors")
+	)
+	(lib_symbols
+		(symbol "Connector:TestPoint"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0.762)
+					(hide yes)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "TP"
+					(at 0 6.858 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Value" "TestPoint"
+					(at 0 5.08 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at 5.08 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "~"
+					(at 5.08 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "test point"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "test point tp"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_fp_filters" "Pin* Test*"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "TestPoint_0_1"
+					(circle
+						(center 0 3.302)
+						(radius 0.762)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "TestPoint_1_1"
+					(pin passive line
+						(at 0 0 90)
+						(length 2.54)
+						(name "1"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 69.85 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e1a98f12-3129-4c0a-8c5a-7014d2ce9706")
+		(property "Reference" "TP200"
+			(at 69.85 65.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AC_L"
+			(at 69.85 73.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 69.85 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 69.85 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "f42df3fb-da02-4a79-90c5-18324dc1b15c"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+					(reference "TP200")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 62.23 69.85) (xy 69.85 69.85))
+		(stroke (width 0) (type solid))
+		(uuid "add1d0cc-dac3-4ea9-8e39-43b76569d053")
+	)
+	(hierarchical_label "AC_L"
+		(shape passive)
+		(at 62.23 69.85 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "29cafdf3-a0c0-4e45-a626-623dd374e09c")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 69.85 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c6a2ad1c-e892-4d2b-93c2-bab91834ffbd")
+		(property "Reference" "TP201"
+			(at 69.85 81.09 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "AC_N"
+			(at 69.85 89.09 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 69.85 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 69.85 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "d1619a38-0f05-4961-a247-535973722b37"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+					(reference "TP201")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 62.23 85.09) (xy 69.85 85.09))
+		(stroke (width 0) (type solid))
+		(uuid "e03358e8-d6d1-4a53-94ce-bdff5d1fbeca")
+	)
+	(hierarchical_label "AC_N"
+		(shape passive)
+		(at 62.23 85.09 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "afd32ba7-37d5-4915-ae36-078999ed0f0c")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 160.02 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "57b26f42-9f8b-46d9-ae4a-9a279c7ebee4")
+		(property "Reference" "TP203"
+			(at 160.02 65.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOTOR_FWD"
+			(at 160.02 73.85 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 160.02 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 160.02 69.85 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "ad1bafbb-50a4-4afe-afed-8d4b63f3189e"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+					(reference "TP203")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 160.02 69.85) (xy 167.64 69.85))
+		(stroke (width 0) (type solid))
+		(uuid "84d4154f-6f26-4005-b7f8-2eb6737082ca")
+	)
+	(hierarchical_label "MOTOR_FWD"
+		(shape passive)
+		(at 167.64 69.85 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "758668c2-89d7-4fff-934d-74833fe59e23")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 160.02 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "89840d33-6b32-4fc7-96c3-483304cde0b9")
+		(property "Reference" "TP204"
+			(at 160.02 81.09 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOTOR_REV"
+			(at 160.02 89.09 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 160.02 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 160.02 85.09 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "810a0b87-4568-4427-94ae-e7c88b76f575"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+					(reference "TP204")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 160.02 85.09) (xy 167.64 85.09))
+		(stroke (width 0) (type solid))
+		(uuid "b63b573b-ecb6-4f34-b01e-3f72aafe6c7b")
+	)
+	(hierarchical_label "MOTOR_REV"
+		(shape passive)
+		(at 167.64 85.09 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "e45c23fa-084d-45ec-8999-dbf9d7bda73c")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 160.02 100.33 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2dcb0322-a6f0-452b-bdf3-271e9e2e499d")
+		(property "Reference" "TP202"
+			(at 160.02 96.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOTOR_COM"
+			(at 160.02 104.33 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 160.02 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 160.02 100.33 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "28ba2f46-4113-4e8d-ba28-331389718dfc"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+					(reference "TP202")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 160.02 100.33) (xy 167.64 100.33))
+		(stroke (width 0) (type solid))
+		(uuid "28fbf48f-3257-4708-9689-b85fae267de5")
+	)
+	(label "AC_N"
+		(at 167.64 100.33 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "524cf43c-43d1-48a9-b3fd-ad635b0f9906")
+	)
+	(sheet_instances
+		(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/de86a9ab-4197-4432-a4b5-3b4e90ab8bdd"
+			(page "2")
+		)
+	)
+	(embedded_fonts no)
+)

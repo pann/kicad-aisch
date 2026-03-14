@@ -1,0 +1,43 @@
+Item,Block,Designator,Description,Manufacturer,MPN,Package,LCSC,Qty,Unit Price (USD),KiCad Symbol,KiCad Footprint,Status
+1,2,U1,ESP32-C3 WiFi/BLE module (4MB flash; PCB antenna),Espressif,ESP32-C3-MINI-1-N4,SMD-53,C2838502,1,2.01,MISSING,MISSING,Import needed (easyeda2kicad)
+2,1,U2,Buck converter 4.5-40V to 3.3V/2A,XLSEMI,XL1509-3.3E1,SOP-8,C74193,1,0.14,Regulator_Switching:XL1509-3.3,Package_SO:SOP-8,OK
+3,4,U3,Quad 2-input NAND gate 3.3V,Texas Instruments,SN74LVC00APWR,TSSOP-14,C7803,1,0.10,74xx:74HC00 (substitute),Package_SO:TSSOP-14,Substitute symbol
+4,8,U4,USB ESD protection TVS,TECH PUBLIC,USBLC6-2SC6,SOT-23-6,C2827693,1,0.02,Power_Protection:USBLC6-2SC6,Package_TO_SOT_SMD:SOT-23-6,OK
+5,3,U5,Optocoupler phototransistor (zero-crossing),Everlight,EL357N(C)(TA)-G,SOP-4,C29981,1,0.03,MISSING,MISSING,Import needed (easyeda2kicad)
+6,6,U6,Optocoupler phototransistor (voltage sense),Everlight,EL357N(C)(TA)-G,SOP-4,C29981,1,0.03,MISSING,MISSING,Import needed (easyeda2kicad)
+7,5,U7,TRIAC output optocoupler (FWD gate),Lite-On,MOC3021S-TA1,SMD-6P,C115465,1,0.14,Relay_SolidState:MOC3021M,Package_SO:SMD-6P,Check footprint
+8,5,U8,TRIAC output optocoupler (REV gate),Lite-On,MOC3021S-TA1,SMD-6P,C115465,1,0.14,Relay_SolidState:MOC3021M,Package_SO:SMD-6P,Check footprint
+9,1,D1,Bridge rectifier 600V/0.5A,ST (Semtech),MB6S,SOP-4 (MBS),C2978785,1,0.02,Diode_Bridge:MB6S,Diode_SMD:D_SOP-4,OK
+10,1,D2,Schottky diode 3A/40V (buck catch diode),Various,SS34,SMA,C8678,1,0.02,Diode:SS34,Diode_SMD:D_SMA,OK
+11,6,D3,Dual Schottky diode (ADC clamp),Various,BAT54S,SOT-23,C66740,1,0.02,Diode:BAT54S,Package_TO_SOT_SMD:SOT-23,OK
+12,3,D4-D7,Signal diode (ZC full-wave bridge x4),Various,1N4148WS,SOD-323,C2128,4,0.01,Diode:1N4148WS,Diode_SMD:D_SOD-323,OK
+14,5,Q1,TRIAC 600V/4A (FWD motor),WEIDA,BT136-600E,TO-252 (DPAK),C2901007,1,0.11,Triac_Thyristor:BT136-600,Package_TO_SOT_SMD:TO-252-2,OK
+15,5,Q2,TRIAC 600V/4A (REV motor),WEIDA,BT136-600E,TO-252 (DPAK),C2901007,1,0.11,Triac_Thyristor:BT136-600,Package_TO_SOT_SMD:TO-252-2,OK
+16,1,L1,Power inductor 68uH/2A shielded,Various,CD8045-68uH,8x8mm SMD,C408345,1,0.08,Device:L,Inductor_SMD:L_Bourns-SRN8040,OK
+17,7,LED1,Green LED 0805,Various,0805 Green,0805,C2297,1,0.01,Device:LED,LED_SMD:LED_0805_2012Metric,OK
+18,8,J1,USB Type-C receptacle 16-pin SMD,SHOU HAN,TYPE-C-16P-073,SMD,C2906290,1,0.04,Connector:USB_C_Receptacle_USB2.0,Connector_USB:USB_C_Receptacle,OK
+19,9,TP1-TP2,Solder pad 2mm (track input AC_L/AC_N),--,--,Pad 2mm,--,2,0.00,Connector:TestPoint,TestPoint:TestPoint_Pad_2.0x2.0mm,PCB feature (test point symbol)
+20,9,TP3-TP5,Solder pad 2mm (motor output COM/FWD/REV),--,--,Pad 2mm,--,3,0.00,Connector:TestPoint,TestPoint:TestPoint_Pad_2.0x2.0mm,PCB feature (test point symbol)
+21,2,SW1,Tactile switch SMD (Reset),Various,3x4mm tactile,SMD,C2886620,1,0.02,Switch:SW_Push,Button_Switch_SMD:SW_Push,OK
+22,2,SW2,Tactile switch SMD (Boot),Various,3x4mm tactile,SMD,C2886620,1,0.02,Switch:SW_Push,Button_Switch_SMD:SW_Push,OK
+23,1,C1,Electrolytic cap 100uF/50V (PSU input),Various,100uF/50V,8x10mm,C2993926,1,0.05,Device:CP,Capacitor_SMD:CP_Elec_8x10mm,OK
+24,1,C2,Ceramic cap 100nF/50V (PSU input HF),Various,100nF/50V X7R,0603,C14663,1,0.01,Device:C,Capacitor_SMD:C_0603_1608Metric,OK
+25,1,C3,Electrolytic cap 220uF/10V (PSU output),Various,220uF/10V,6.3x7.7mm,C2891399,1,0.04,Device:CP,Capacitor_SMD:CP_Elec_6.3x7.7mm,OK
+26,1,C4,Ceramic cap 22uF/10V (PSU output),Various,22uF/10V X5R,0805,C5662523,1,0.02,Device:C,Capacitor_SMD:C_0805_2012Metric,OK
+27,2,C5-C6,Ceramic cap 10uF/10V (MCU bulk decoupling),Various,10uF/10V X5R,0805,C15850,2,0.01,Device:C,Capacitor_SMD:C_0805_2012Metric,OK
+28,2,C7-C10,Ceramic cap 100nF/25V (MCU HF decoupling),Various,100nF/25V X7R,0603,C14663,4,0.01,Device:C,Capacitor_SMD:C_0603_1608Metric,OK
+29,2,C11,Ceramic cap 100nF (EN reset delay),Various,100nF X7R,0603,C14663,1,0.01,Device:C,Capacitor_SMD:C_0603_1608Metric,OK
+30,4,C12,Ceramic cap 100nF/10V (logic decoupling),Various,100nF X7R,0603,C14663,1,0.01,Device:C,Capacitor_SMD:C_0603_1608Metric,OK
+31,6,C13,Ceramic cap 1uF/10V (V_SENSE filter),Various,1uF/10V X7R,0603,C15849,1,0.01,Device:C,Capacitor_SMD:C_0603_1608Metric,OK
+32,5,C14-C15,Film/ceramic cap 100nF/400V (TRIAC snubber x2),Various,100nF/400V,Film or 1812,--,2,0.05,Device:C,Capacitor_SMD:C_1812,Check availability
+33,3,R1-R2,Resistor 3.3K 1W (ZC AC series x2),Various,3.3K/1W,1206,--,2,0.01,Device:R,Resistor_SMD:R_1206_3216Metric,OK
+34,2,R3-R4,Resistor 10K (EN + GPIO9 pull-up),Various,10K 1%,0603,C25804,2,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+35,3,R5,Resistor 10K (ZC DC pull-up),Various,10K 1%,0603,C25804,1,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+36,5,R6-R7,Resistor 470R (opto LED drive x2),Various,470R 1%,0603,C23179,2,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+37,5,R8-R9,Resistor 360R 0.5W (TRIAC gate x2),Various,360R,1206,--,2,0.01,Device:R,Resistor_SMD:R_1206_3216Metric,OK
+38,5,R10-R11,Resistor 100R 0.5W (snubber x2),Various,100R,1206,--,2,0.01,Device:R,Resistor_SMD:R_1206_3216Metric,OK
+39,6,R12-R13,Resistor 10K 0.5W (V_SENSE AC series x2),Various,10K/0.5W,1206,--,2,0.01,Device:R,Resistor_SMD:R_1206_3216Metric,OK
+40,6,R14,Resistor 10K (V_SENSE DC load),Various,10K 1%,0603,C25804,1,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+41,6,R15,Resistor 1K (ADC protection series),Various,1K 1%,0603,C21190,1,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+42,7,R16,Resistor 1K (LED current limiting),Various,1K 1%,0603,C21190,1,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK
+43,8,R17-R18,Resistor 5.1K (USB CC pull-down x2),Various,5.1K 1%,0603,C23186,2,0.01,Device:R,Resistor_SMD:R_0603_1608Metric,OK

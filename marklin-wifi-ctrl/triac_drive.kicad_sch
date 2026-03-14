@@ -1,0 +1,1421 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "8b0f51a7-1851-4853-b5c5-2621f7f57929")
+	(paper "A4")
+	(title_block
+		(title "TRIAC Drive")
+		(date "2026-03-10")
+		(rev "0.1")
+		(company "ZID AB")
+		(comment 1 "Author: PA Nilsson")
+		(comment 2 "Block 5: MOC3021S + BT136 motor winding drive (x2)")
+	)
+	(lib_symbols
+		(symbol "marklin-wifi-ctrl:MOC3021S-TA1"
+		    (exclude_from_sim no)
+		  (in_bom yes)
+		    (on_board yes)
+		    (property "Reference" "U"
+		      (at 0 10.16 0)
+		      (effects (font (size 1.27 1.27)))
+		    )
+		    (property "Value" "MOC3021S-TA1"
+		      (at 0 -10.16 0)
+		      (effects (font (size 1.27 1.27)))
+		    )
+		    (property "Footprint" "marklin-wifi-ctrl:SMD-6_L7.3-W6.5-P2.54-LS10.2-BL"
+		      (at 0 -12.70 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (property "Datasheet" "https://lcsc.com/product-detail/SMD-Optocouplers_MOC3021S-TA1_C115465.html"
+		      (at 0 -15.24 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (property "LCSC Part" "C115465"
+		      (at 0 -17.78 0)
+		      (effects (font (size 1.27 1.27)) (hide yes))
+		    )
+		    (symbol "MOC3021S-TA1_0_1"
+		      (rectangle
+		        (start -7.62 7.62)
+		        (end 7.62 -7.62)
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy -7.62 5.08) (xy -3.56 5.08) (xy -3.56 -0.00) (xy -7.62 -0.00)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 1.27 0.76) (xy 5.08 0.76)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 1.27 0.76) (xy 2.54 -0.76) (xy 3.81 0.76)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 5.33 -1.02) (xy 1.52 -1.02)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 5.33 -1.02) (xy 4.06 0.51) (xy 2.79 -1.02)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 7.62 5.08) (xy 2.54 5.08) (xy 2.54 0.76)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy 2.54 -1.02) (xy 2.54 -5.08) (xy 7.62 -5.08)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (polyline
+		        (pts
+		          (xy -4.57 3.30) (xy -2.54 3.30) (xy -3.56 1.78) (xy -4.57 3.30)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type background))
+		      )
+		      (polyline
+		        (pts
+		          (xy -4.57 1.78) (xy -2.54 1.78)
+		        )
+		        (stroke (width 0) (type default))
+		        (fill (type none))
+		      )
+		      (pin unspecified line
+		        (at -12.70 5.08 0)
+		        (length 5.08)
+		        (name "AN" (effects (font (size 1.27 1.27))))
+		        (number "1" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at -12.70 -0.00 0)
+		        (length 5.08)
+		        (name "CAT" (effects (font (size 1.27 1.27))))
+		        (number "2" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at -12.70 -5.08 0)
+		        (length 5.08)
+		        (name "NC" (effects (font (size 1.27 1.27))))
+		        (number "3" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at 12.70 -5.08 180)
+		        (length 5.08)
+		        (name "MT" (effects (font (size 1.27 1.27))))
+		        (number "4" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at 12.70 -0.00 180)
+		        (length 5.08)
+		        (name "SUB" (effects (font (size 1.27 1.27))))
+		        (number "5" (effects (font (size 1.27 1.27))))
+		      )
+		      (pin unspecified line
+		        (at 12.70 5.08 180)
+		        (length 5.08)
+		        (name "MT" (effects (font (size 1.27 1.27))))
+		        (number "6" (effects (font (size 1.27 1.27))))
+		      )
+		    )
+		  (embedded_fonts no)
+		)
+		(symbol "Device:R"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "R"
+					(at 2.032 0 90)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Value" "R"
+					(at 0 0 90)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at -1.778 0 90)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "~"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Resistor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "R res resistor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_fp_filters" "R_*"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "R_0_1"
+					(rectangle
+						(start -1.016 -2.54)
+						(end 1.016 2.54)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "R_1_1"
+					(pin passive line
+						(at 0 3.81 270)
+						(length 1.27)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 0 -3.81 90)
+						(length 1.27)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "2"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "Device:C"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0.254)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "C"
+					(at 0.635 2.54 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left)
+					)
+				)
+				(property "Value" "C"
+					(at 0.635 -2.54 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left)
+					)
+				)
+				(property "Footprint" ""
+					(at 0.9652 -3.81 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "~"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Unpolarized capacitor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "cap capacitor"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_fp_filters" "C_*"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "C_0_1"
+					(polyline
+						(pts
+							(xy -2.032 0.762) (xy 2.032 0.762)
+						)
+						(stroke
+							(width 0.508)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy -2.032 -0.762) (xy 2.032 -0.762)
+						)
+						(stroke
+							(width 0.508)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "C_1_1"
+					(pin passive line
+						(at 0 3.81 270)
+						(length 2.794)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 0 -3.81 90)
+						(length 2.794)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "2"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "Device:Q_Triac"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "D"
+					(at 3.175 0.635 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left)
+					)
+				)
+				(property "Value" "Q_Triac"
+					(at 3.175 -1.27 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify left)
+					)
+				)
+				(property "Footprint" ""
+					(at 1.905 0.635 90)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" "~"
+					(at 0 0 90)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Triode for alternating current, generic/no defined pinout"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "TRIAC"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "Q_Triac_0_1"
+					(polyline
+						(pts
+							(xy -2.54 1.27) (xy 2.54 1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy -2.54 1.27) (xy -1.27 -1.27) (xy 0 1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy -2.54 -1.27) (xy 2.54 -1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy -1.27 -2.54) (xy -0.635 -1.27)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 0 -1.27) (xy 1.27 1.27) (xy 2.54 -1.27)
+						)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "Q_Triac_1_1"
+					(pin input line
+						(at -3.81 -2.54 0)
+						(length 2.54)
+						(name "G"
+							(effects (font (size 0.635 0.635)))
+						)
+						(number "G"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 0 3.81 270)
+						(length 2.54)
+						(name "A2"
+							(effects (font (size 0.635 0.635)))
+						)
+						(number "A2"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+					(pin passive line
+						(at 0 -3.81 90)
+						(length 2.54)
+						(name "A1"
+							(effects (font (size 0.635 0.635)))
+						)
+						(number "A1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "power:+3V3"
+				(power)
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+					(hide yes)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(property "Reference" "#PWR"
+					(at 0 -3.81 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Value" "+3V3"
+					(at 0 3.556 0)
+					(effects (font (size 1.27 1.27)))
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "Description" "Power symbol creates a global label with name \"+3V3\""
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(property "ki_keywords" "global power"
+					(at 0 0 0)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(hide yes)
+					)
+				)
+				(symbol "+3V3_0_1"
+					(polyline
+						(pts
+							(xy -0.762 1.27) (xy 0 2.54)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 0 2.54) (xy 0.762 1.27)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+					(polyline
+						(pts
+							(xy 0 0) (xy 0 2.54)
+						)
+						(stroke
+							(width 0)
+							(type default)
+						)
+						(fill
+							(type none)
+						)
+					)
+				)
+				(symbol "+3V3_1_1"
+					(pin power_in line
+						(at 0 0 90)
+						(length 0)
+						(name "~"
+							(effects (font (size 1.27 1.27)))
+						)
+						(number "1"
+							(effects (font (size 1.27 1.27)))
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+	)
+	(symbol
+		(lib_id "marklin-wifi-ctrl:MOC3021S-TA1")
+		(at 80.01 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c55e08c6-71b8-4c84-a441-edd5f87ebb52")
+		(property "Reference" "U800"
+			(at 80.01 50.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOC3021S-TA1"
+			(at 80.01 58.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "marklin-wifi-ctrl:SMD-6_L7.3-W6.5-P2.54-LS10.2-BL"
+			(at 80.01 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 80.01 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "2ee78038-6f4e-46b8-9549-5560cde80e19"))
+		(pin "2" (uuid "99b5fa05-269b-4875-88ac-5e446127f1bf"))
+		(pin "3" (uuid "e31dc128-f494-42c1-b5b4-d9050c656f2a"))
+		(pin "4" (uuid "3216e722-b05e-4388-ab5d-055d635ec525"))
+		(pin "5" (uuid "0c78b017-621d-4fce-a5f8-9361d02a4316"))
+		(pin "6" (uuid "95f4cabe-acf2-400c-97d8-fd8d7e26cecf"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "U800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 67.31 49.53) (xy 67.31 41.91))
+		(stroke (width 0) (type solid))
+		(uuid "5af85bec-981c-442e-b285-7eefe207b79b")
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 67.31 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "1a2e74a4-a41c-44b5-9625-626e5da1333d")
+		(property "Reference" "#PWR0800"
+			(at 67.31 39.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "+3V3"
+			(at 67.31 43.91 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 67.31 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" ""
+			(at 67.31 41.91 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "b0898ee8-9755-4266-b61f-39a9351fe1e3"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "#PWR0800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 48.26 54.61 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3a23e795-4658-4808-a1aa-dbf7ee53f2f3")
+		(property "Reference" "R800"
+			(at 48.26 50.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "470R"
+			(at 48.26 58.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 48.26 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 48.26 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "164b6425-22b7-4401-ae50-6d6afa92084e"))
+		(pin "2" (uuid "68ecd850-77b2-4b3d-b59b-f4c17533b0c1"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 52.07 54.61) (xy 67.31 54.61))
+		(stroke (width 0) (type solid))
+		(uuid "db4bc92f-14ff-4d35-9948-fc3043175fb3")
+	)
+	(wire
+		(pts (xy 36.83 54.61) (xy 44.45 54.61))
+		(stroke (width 0) (type solid))
+		(uuid "d17822b2-fb26-4b47-ab85-5e1881eeeecc")
+	)
+	(hierarchical_label "FWD_GATE"
+		(shape input)
+		(at 36.83 54.61 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "6b7f7062-6e59-4cd1-a341-9908ab409756")
+	)
+	(no_connect
+		(at 67.31 59.69)
+		(uuid "5dcf1e8b-fd0c-4831-a6b4-13f645d3f345")
+	)
+	(no_connect
+		(at 92.71 54.61)
+		(uuid "70745cb8-fb0d-4983-bb9b-2e2ac103bac9")
+	)
+	(symbol
+		(lib_id "Device:Q_Triac")
+		(at 144.78 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "adff2ebf-1efd-4075-94e7-60e82fa577ad")
+		(property "Reference" "Q800"
+			(at 144.78 50.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "BT136-600E"
+			(at 144.78 58.61 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 144.78 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 144.78 54.61 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "G" (uuid "be2c45d3-7beb-49a0-8cfc-f7c28586270f"))
+		(pin "A2" (uuid "65b0687e-9f28-4371-bdf5-0d017caf989a"))
+		(pin "A1" (uuid "659e6ac9-dd94-4fdc-8eed-4870ba859ed8"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "Q800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 92.71 59.69) (xy 100.33 59.69))
+		(stroke (width 0) (type solid))
+		(uuid "704e6cf7-850a-4840-a1bf-99ac6a77a36e")
+	)
+	(hierarchical_label "MOTOR_FWD"
+		(shape passive)
+		(at 100.33 59.69 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "1bc72dca-8ded-45a6-a32d-460b629f6345")
+	)
+	(wire
+		(pts (xy 144.78 58.42) (xy 152.4 58.42))
+		(stroke (width 0) (type solid))
+		(uuid "c5e2fd7d-8e88-4315-a8bc-c85cc1764cab")
+	)
+	(label "MOTOR_FWD"
+		(at 152.4 58.42 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "529e5e81-533a-45c4-8df7-46bba8469721")
+	)
+	(wire
+		(pts (xy 144.78 50.8) (xy 152.4 50.8))
+		(stroke (width 0) (type solid))
+		(uuid "50ba3f3b-40bf-4fc7-b464-3b0060169a1d")
+	)
+	(hierarchical_label "AC_L"
+		(shape passive)
+		(at 152.4 50.8 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "fa6c42d5-e9c0-433b-8e1b-bdf01e19cb33")
+	)
+	(wire
+		(pts (xy 144.78 58.42) (xy 144.78 66.04))
+		(stroke (width 0) (type solid))
+		(uuid "7539ade9-dbc3-4eb5-b08b-066756b8be48")
+	)
+	(wire
+		(pts (xy 144.78 66.04) (xy 152.4 66.04))
+		(stroke (width 0) (type solid))
+		(uuid "72332a83-6aef-459c-879d-c6cb500cc97a")
+	)
+	(label "MOTOR_FWD"
+		(at 152.4 66.04 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "42462dba-644d-4a2c-bcb2-ae14ffecb7f0")
+	)
+	(junction
+		(at 144.78 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "02562d7f-97e9-429e-81b0-47c23c7a6b9e")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 107.95 49.53 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a0c45611-4ea2-45f4-8741-53186cb48df2")
+		(property "Reference" "R801"
+			(at 107.95 45.53 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "360R"
+			(at 107.95 53.53 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 107.95 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 107.95 49.53 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "0b6f5cf8-eebf-457f-a7c3-c3e427b3c74a"))
+		(pin "2" (uuid "61f6ab96-7885-4396-a541-e2aeae1609e1"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 92.71 49.53) (xy 104.14 49.53))
+		(stroke (width 0) (type solid))
+		(uuid "a346ebf4-28be-45aa-8fa9-60efd3cf85da")
+	)
+	(wire
+		(pts (xy 111.76 49.53) (xy 111.76 57.15))
+		(stroke (width 0) (type solid))
+		(uuid "1248322f-33bd-4d00-9786-6395b72ef076")
+	)
+	(wire
+		(pts (xy 111.76 57.15) (xy 140.97 57.15))
+		(stroke (width 0) (type solid))
+		(uuid "a8c9bc73-7500-4d88-a6eb-940e3fc6e5a0")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 165.1 52.07 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a963f7cd-86f3-4fb6-a273-6a427ddfe7a2")
+		(property "Reference" "R802"
+			(at 165.1 48.07 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 165.1 56.07 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 165.1 52.07 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 165.1 52.07 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "cf9e5a9d-18fd-461e-9d0c-0b5bfaa19382"))
+		(pin "2" (uuid "73ed975a-560b-4712-b021-c1543d74a5eb"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R802")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 165.1 58.42 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "501261b5-edfe-49a7-aee9-aa4c680444bb")
+		(property "Reference" "C800"
+			(at 165.1 54.42 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF/400V"
+			(at 165.1 62.42 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 165.1 58.42 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 165.1 58.42 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "4dc544f7-d708-4701-9abe-924df5a3ff4a"))
+		(pin "2" (uuid "3a5ed637-8133-4d2c-85ef-823aa14a0556"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "C800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 165.1 55.88) (xy 165.1 54.61))
+		(stroke (width 0) (type solid))
+		(uuid "713595e4-d1b5-4e21-8a62-1fa9cc2976f4")
+	)
+	(wire
+		(pts (xy 157.48 48.26) (xy 165.1 48.26))
+		(stroke (width 0) (type solid))
+		(uuid "b6b39308-2502-4be8-b584-3835e4ceb0c1")
+	)
+	(label "AC_L"
+		(at 157.48 48.26 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "891eef94-f00f-4be6-bae4-4aa8b92561c6")
+	)
+	(wire
+		(pts (xy 165.1 62.23) (xy 172.72 62.23))
+		(stroke (width 0) (type solid))
+		(uuid "dda2be4c-26f2-4468-83e2-5fe1b45c558c")
+	)
+	(label "MOTOR_FWD"
+		(at 172.72 62.23 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "969680ef-15da-46ba-a1b3-3b19a3bd7a08")
+	)
+	(symbol
+		(lib_id "marklin-wifi-ctrl:MOC3021S-TA1")
+		(at 80.01 110.49 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1d278308-da54-4a63-a6da-5d5fa51a067c")
+		(property "Reference" "U801"
+			(at 80.01 106.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MOC3021S-TA1"
+			(at 80.01 114.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "marklin-wifi-ctrl:SMD-6_L7.3-W6.5-P2.54-LS10.2-BL"
+			(at 80.01 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 80.01 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "4c422be4-10f9-4a07-9678-0d78af85d0be"))
+		(pin "2" (uuid "577c0d08-8722-4151-ba70-1993e03a8215"))
+		(pin "3" (uuid "4192f08b-4d9e-4eb9-9eb2-359a3810f092"))
+		(pin "4" (uuid "16e63eda-1ea1-4913-8740-2746de210e1b"))
+		(pin "5" (uuid "1f3c08a7-4040-4a5f-bd33-c5f6574eedd6"))
+		(pin "6" (uuid "a03b5e19-3e50-4d9e-ac45-68c2ce6493b3"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "U801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 67.31 105.41) (xy 67.31 97.79))
+		(stroke (width 0) (type solid))
+		(uuid "cda84102-1212-42ae-b210-923a5acb823d")
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 67.31 97.79 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "2fe7fac2-77d3-487b-96a4-55b0e1b82f31")
+		(property "Reference" "#PWR0801"
+			(at 67.31 95.79 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Value" "+3V3"
+			(at 67.31 99.79 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 67.31 97.79 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" ""
+			(at 67.31 97.79 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "3e0d62d8-813d-485f-b9a0-71f2765f720e"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "#PWR0801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 48.26 110.49 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5c6055e5-a3d3-483f-8da6-941b77e41af3")
+		(property "Reference" "R803"
+			(at 48.26 106.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "470R"
+			(at 48.26 114.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 48.26 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 48.26 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "e583c809-9d4a-46e0-89ec-a51624771c98"))
+		(pin "2" (uuid "58161092-2699-4180-aedc-18656e526ffc"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R803")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 52.07 110.49) (xy 67.31 110.49))
+		(stroke (width 0) (type solid))
+		(uuid "b28d2f50-4e3b-44f6-a948-aaa27d92656e")
+	)
+	(wire
+		(pts (xy 36.83 110.49) (xy 44.45 110.49))
+		(stroke (width 0) (type solid))
+		(uuid "5c9aa19a-a259-434e-9172-70e454b3cea7")
+	)
+	(hierarchical_label "REV_GATE"
+		(shape input)
+		(at 36.83 110.49 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "bc38c569-bb2a-432e-8799-6d9463650f6e")
+	)
+	(no_connect
+		(at 67.31 115.57)
+		(uuid "46d96864-faa2-4d85-a284-a0e47ed6426b")
+	)
+	(no_connect
+		(at 92.71 110.49)
+		(uuid "9fde1e0e-92db-4d13-bc43-194a1bfe0c82")
+	)
+	(symbol
+		(lib_id "Device:Q_Triac")
+		(at 144.78 110.49 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "68b73530-d9f9-4623-9ca5-b3beec8b8e4a")
+		(property "Reference" "Q801"
+			(at 144.78 106.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "BT136-600E"
+			(at 144.78 114.49 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 144.78 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 144.78 110.49 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "G" (uuid "d4ed53b4-a617-4734-8bea-9ff86e7ad39e"))
+		(pin "A2" (uuid "d33a0cc8-ec92-4276-ba07-5c376603e346"))
+		(pin "A1" (uuid "ea06f626-b0bf-4b42-ae58-dc0f9a43ce9c"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "Q801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 92.71 115.57) (xy 100.33 115.57))
+		(stroke (width 0) (type solid))
+		(uuid "f54f1324-218c-45dc-882b-cd3a24d4b579")
+	)
+	(hierarchical_label "MOTOR_REV"
+		(shape passive)
+		(at 100.33 115.57 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "e300c0da-676f-4c74-985b-45d9538351c5")
+	)
+	(wire
+		(pts (xy 144.78 114.3) (xy 152.4 114.3))
+		(stroke (width 0) (type solid))
+		(uuid "5d8e3b9a-4c6f-447e-adc6-7a9f60da7497")
+	)
+	(label "MOTOR_REV"
+		(at 152.4 114.3 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "e4930787-34b9-41f3-9fe3-c1dd0696380a")
+	)
+	(wire
+		(pts (xy 144.78 106.68) (xy 152.4 106.68))
+		(stroke (width 0) (type solid))
+		(uuid "055f76f6-8167-4c4f-9512-08cd77561270")
+	)
+	(label "AC_L"
+		(at 152.4 106.68 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "f558bc52-e15d-444e-b197-1c626868f0b3")
+	)
+	(wire
+		(pts (xy 144.78 114.3) (xy 144.78 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "283a1ba6-602e-4a4c-b170-76724f05b742")
+	)
+	(wire
+		(pts (xy 144.78 121.92) (xy 152.4 121.92))
+		(stroke (width 0) (type solid))
+		(uuid "a6f3c6c8-5e96-4c05-a16e-73688adb8de6")
+	)
+	(label "MOTOR_REV"
+		(at 152.4 121.92 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "1ee51449-aac7-4867-93d7-abedecbd51bd")
+	)
+	(junction
+		(at 144.78 114.3)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "1e3b5f60-e987-4d09-aef1-20edfc7bb205")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 107.95 105.41 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d398bb5a-e2cf-49a3-a108-06c8be219676")
+		(property "Reference" "R804"
+			(at 107.95 101.41 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "360R"
+			(at 107.95 109.41 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 107.95 105.41 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 107.95 105.41 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "1e023745-8823-49de-a45a-c57ed175b357"))
+		(pin "2" (uuid "67543fae-0228-465e-92ec-5888c650d4ef"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R804")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 92.71 105.41) (xy 104.14 105.41))
+		(stroke (width 0) (type solid))
+		(uuid "fcb1b147-6888-4383-b8b3-f97d954a9933")
+	)
+	(wire
+		(pts (xy 111.76 105.41) (xy 111.76 113.03))
+		(stroke (width 0) (type solid))
+		(uuid "e2fdd9cf-99e5-419d-bd6b-d038db36dd48")
+	)
+	(wire
+		(pts (xy 111.76 113.03) (xy 140.97 113.03))
+		(stroke (width 0) (type solid))
+		(uuid "58465948-ebc8-428b-8b75-8f55a5149984")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 165.1 106.68 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7273ca3d-3a71-4d6a-9574-9aafdf262779")
+		(property "Reference" "R805"
+			(at 165.1 102.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100R"
+			(at 165.1 110.68 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 165.1 106.68 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 165.1 106.68 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "42593d49-90b3-4e24-a66c-016a05d0bfaa"))
+		(pin "2" (uuid "b968bd89-5289-4c91-b3c7-74b05257e568"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "R805")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 165.1 113.03 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5aa265b5-c282-41d8-bbcd-099ef323e6c5")
+		(property "Reference" "C801"
+			(at 165.1 109.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF/400V"
+			(at 165.1 117.03 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 165.1 113.03 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(property "Datasheet" "~"
+			(at 165.1 113.03 0)
+			(effects (font (size 1.27 1.27)) (hide yes))
+		)
+		(pin "1" (uuid "e0dd65a3-a098-441a-9b3a-6924893f2ac9"))
+		(pin "2" (uuid "56fdeedf-d0ce-4455-88a3-96bfe56ca466"))
+		(instances
+			(project "marklin-wifi-ctrl"
+				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+					(reference "C801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 165.1 110.49) (xy 165.1 109.22))
+		(stroke (width 0) (type solid))
+		(uuid "1edeb6ee-0bdf-49fb-b7b0-eb87261744d8")
+	)
+	(wire
+		(pts (xy 157.48 102.87) (xy 165.1 102.87))
+		(stroke (width 0) (type solid))
+		(uuid "2dbd4b89-4315-4391-a39a-45ccb49f741e")
+	)
+	(label "AC_L"
+		(at 157.48 102.87 180)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify right bottom))
+		(uuid "9ba8dce5-a7b9-4759-8497-85bc04918af8")
+	)
+	(wire
+		(pts (xy 165.1 116.84) (xy 172.72 116.84))
+		(stroke (width 0) (type solid))
+		(uuid "437e3104-be16-416f-a70c-13e17a5b7708")
+	)
+	(label "MOTOR_REV"
+		(at 172.72 116.84 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "56075ea2-ba50-4594-8c6e-29abb5ab4428")
+	)
+	(sheet_instances
+		(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
+			(page "8")
+		)
+	)
+	(embedded_fonts no)
+)
