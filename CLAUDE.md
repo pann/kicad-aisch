@@ -83,6 +83,12 @@ All label functions place the label at a STUB offset from the pin tip:
 - **Power symbol clearance**: watch for overlapping +VCC and GND stubs when they share the same x-coordinate at close y-positions (STUB = 7.62mm each direction)
 - Always verify readability with SVG export: `kicad-cli sch export svg --output /tmp/ <file.kicad_sch>`
 
+## Wiring Rules
+
+- **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
+- Prefer direct wires between components over net labels for readability. Use net labels only when wires would cross or span long distances.
+- Use junctions where three or more wire segments meet at the same point.
+
 ## Schematic Design Rules
 
 ### Hierarchical Labels

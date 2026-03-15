@@ -295,6 +295,11 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
 - Watch for overlapping power stubs at same x-coordinate (GND goes 7.62mm down, VCC goes 7.62mm up)
 - Verify readability with SVG export after generation
 
+### Wiring Rules
+- **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
+- Prefer direct wires between components over net labels for readability. Use net labels only when wires would cross or span long distances.
+- Use junctions where three or more wire segments meet at the same point.
+
 ---
 
 ## Schematic Design Rules

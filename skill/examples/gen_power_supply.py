@@ -89,18 +89,19 @@ def main():
         "Diode_SMD:Diode_Bridge_Diotec_SO-DIL-Slim",
         ["4", "2", "1", "3"],
     )
-    # pin2 (AC, top): (55, 67.38) → AC_L
+    # Pin coordinates:
+    # pin2 (AC, top):    (55, 67.38) → AC_L
     # pin1 (AC, bottom): (55, 82.62) → AC_N
     # pin3 (DC+, right): (62.62, 75) → VIN rail
-    # pin4 (DC-, left): (47.38, 75) → GND
+    # pin4 (DC-, left):  (47.38, 75) → GND
+    br_dc_plus = (62.62, 75)
     sb.add_hlabel("AC_L", br_cx, br_cy - 7.62, 180, "passive")
     sb.add_hlabel("AC_N", br_cx, br_cy + 7.62, 180, "passive")
     # GND on pin4 (DC-): route LEFT first, then DOWN — straight down would
-    # short with AC_N hlabel stub which also ends at (47.38, 82.62).
+    # collide with AC_N hlabel stub which also ends at (47.38, 82.62).
     gnd_x = br_cx - 7.62 - 7.62  # = 39.76 — clear of AC_N stub
     sb.add_wire(br_cx - 7.62, br_cy, gnd_x, br_cy)
     sb.place_power("GND", gnd_x, br_cy)
-    sb.add_net_label("VIN", br_cx + 7.62, br_cy, 0)
 
     # ═══════════════════════════════════════════════════════════════════
     # C1: 100uF/50V input bulk cap at (82, 75) angle=0
@@ -111,10 +112,9 @@ def main():
         "Capacitor_SMD:CP_Elec_8x10.5",
         ["1", "2"],
     )
-    # pin1(+) top: (82, 71.19) → VIN
-    # pin2(-) bottom: (82, 78.81) → GND
-    sb.add_net_label("VIN", 82, 71.19, 180)
-    sb.place_power("GND", 82, 78.81)
+    c300_plus = (82, 71.19)   # pin1(+) top
+    c300_minus = (82, 78.81)  # pin2(-) bottom
+    sb.place_power("GND", c300_minus[0], c300_minus[1])
 
     # ═══════════════════════════════════════════════════════════════════
     # C2: 100nF/50V input ceramic bypass at (97, 75) angle=0
@@ -125,8 +125,9 @@ def main():
         "Capacitor_SMD:C_0805_2012Metric",
         ["1", "2"],
     )
-    sb.add_net_label("VIN", 97, 71.19, 180)
-    sb.place_power("GND", 97, 78.81)
+    c301_plus = (97, 71.19)   # pin1 top
+    c301_minus = (97, 78.81)  # pin2 bottom
+    sb.place_power("GND", c301_minus[0], c301_minus[1])
 
     # ═══════════════════════════════════════════════════════════════════
     # U1: XL1509-3.3 Buck Converter at (130, 70)
@@ -138,16 +139,32 @@ def main():
         "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
         ["1", "4", "5", "6", "7", "8", "2", "3"],
     )
-    # pin1 (VIN): (119.84, 67.46) → VIN
-    # pin4 (~EN): (119.84, 72.54) → VIN (tied high = always enabled)
-    # pin5-8 (GND): (130, 77.62) → GND
-    # pin2 (OUT): (140.16, 67.46) → VSW (switch node)
-    # pin3 (FB): (140.16, 72.54) → +3V3 output (fixed version feedback)
-    sb.add_net_label("VIN", xl_cx - 10.16, xl_cy - 2.54, 180)
-    sb.add_net_label("VIN", xl_cx - 10.16, xl_cy + 2.54, 180)
-    sb.place_power("GND", xl_cx, xl_cy + 7.62)
-    sb.add_net_label("VSW", xl_cx + 10.16, xl_cy - 2.54, 0)
-    sb.add_net_label("+3V3", xl_cx + 10.16, xl_cy + 2.54, 0)
+    xl_vin = (119.84, 67.46)   # pin1 (VIN)
+    xl_en = (119.84, 72.54)    # pin4 (~EN) — tied to VIN (always enabled)
+    xl_gnd = (130, 77.62)      # pin5-8 (GND)
+    xl_out = (140.16, 67.46)   # pin2 (OUT) — switch node
+    xl_fb = (140.16, 72.54)    # pin3 (FB) — +3V3 output (fixed version)
+    sb.place_power("GND", xl_gnd[0], xl_gnd[1])
+
+    # ── VIN rail: bridge DC+ → C300 → C301 → XL1509 VIN/~EN ──
+    # Horizontal bus at y=71.19 (cap pin1 level), segmented at each pin
+    vin_y = 71.19
+    # Bridge DC+ up to bus level
+    sb.add_wire(br_dc_plus[0], br_dc_plus[1], br_dc_plus[0], vin_y)
+    # Segment: bridge → C300 pin1
+    sb.add_wire(br_dc_plus[0], vin_y, c300_plus[0], vin_y)
+    # Segment: C300 pin1 → C301 pin1
+    sb.add_wire(c300_plus[0], vin_y, c301_plus[0], vin_y)
+    # Segment: C301 pin1 → XL1509 VIN x
+    sb.add_wire(c301_plus[0], vin_y, xl_vin[0], vin_y)
+    # VIN pin: up from bus to XL1509 pin1
+    sb.add_wire(xl_vin[0], vin_y, xl_vin[0], xl_vin[1])
+    # ~EN pin: down from bus to XL1509 pin4 (tie high)
+    sb.add_wire(xl_vin[0], vin_y, xl_vin[0], xl_en[1])
+    # Junctions at branch points
+    sb.add_junction(c300_plus[0], vin_y)
+    sb.add_junction(c301_plus[0], vin_y)
+    sb.add_junction(xl_vin[0], vin_y)
 
     # ═══════════════════════════════════════════════════════════════════
     # D2: SS34 Schottky catch diode at (155, 78) angle=270
@@ -159,10 +176,9 @@ def main():
         "Diode_SMD:D_SMA",
         ["1", "2"],
     )
-    # K (cathode) top: (155, 74.19) → VSW net
-    # A (anode) bottom: (155, 81.81) → GND
-    sb.add_net_label("VSW", 155, 74.19, 180)
-    sb.place_power("GND", 155, 81.81)
+    d301_k = (155, 74.19)   # K (cathode) top
+    d301_a = (155, 81.81)   # A (anode) bottom
+    sb.place_power("GND", d301_a[0], d301_a[1])
 
     # ═══════════════════════════════════════════════════════════════════
     # L1: 68uH inductor at (170, 67.46) angle=90 (horizontal)
@@ -174,10 +190,19 @@ def main():
         "Inductor_SMD:L_Bourns_SRN8040TA",
         ["1", "2"],
     )
-    # pin2 (left): (166.19, 67.46) → VSW
-    # pin1 (right): (173.81, 67.46) → V3V3 output
-    sb.add_net_label("VSW", 166.19, 67.46, 180)
-    sb.add_net_label("+3V3", 173.81, 67.46, 0)
+    l300_left = (166.19, 67.46)   # pin2 (left) → VSW
+    l300_right = (173.81, 67.46)  # pin1 (right) → +3V3 output
+
+    # ── VSW rail: XL1509 OUT → SS34 cathode → L1 input ──
+    # Horizontal bus at y=67.46 (XL1509 OUT / L1 level), segmented at D301
+    vsw_y = 67.46
+    # Segment: XL1509 OUT → D301 cathode x
+    sb.add_wire(xl_out[0], vsw_y, d301_k[0], vsw_y)
+    # Segment: D301 cathode x → L1 left pin
+    sb.add_wire(d301_k[0], vsw_y, l300_left[0], vsw_y)
+    # SS34 cathode: vertical drop from bus to diode
+    sb.add_wire(d301_k[0], vsw_y, d301_k[0], d301_k[1])
+    sb.add_junction(d301_k[0], vsw_y)
 
     # ═══════════════════════════════════════════════════════════════════
     # C3: 220uF/10V output bulk cap at (192, 75) angle=0
@@ -188,8 +213,9 @@ def main():
         "Capacitor_SMD:CP_Elec_6.3x7.7",
         ["1", "2"],
     )
-    sb.add_net_label("+3V3", 192, 71.19, 180)
-    sb.place_power("GND", 192, 78.81)
+    c302_plus = (192, 71.19)
+    c302_minus = (192, 78.81)
+    sb.place_power("GND", c302_minus[0], c302_minus[1])
 
     # ═══════════════════════════════════════════════════════════════════
     # C4: 22uF/10V output ceramic cap at (207, 75) angle=0
@@ -200,19 +226,34 @@ def main():
         "Capacitor_SMD:C_0805_2012Metric",
         ["1", "2"],
     )
-    sb.add_net_label("+3V3", 207, 71.19, 180)
-    sb.place_power("GND", 207, 78.81)
+    c303_plus = (207, 71.19)
+    c303_minus = (207, 78.81)
+    sb.place_power("GND", c303_minus[0], c303_minus[1])
+
+    # ── +3V3 rail: L1 output → output caps → XL1509 FB ──
+    # Horizontal bus at y=71.19 (cap pin1 level), segmented at each pin
+    v33_y = 71.19
+    # L1 output down to bus level
+    sb.add_wire(l300_right[0], l300_right[1], l300_right[0], v33_y)
+    # Segment: L1 output → C302 pin1
+    sb.add_wire(l300_right[0], v33_y, c302_plus[0], v33_y)
+    # Segment: C302 pin1 → C303 pin1
+    sb.add_wire(c302_plus[0], v33_y, c303_plus[0], v33_y)
+    # XL1509 FB: wire from FB pin right to L1 output x, then up to bus
+    sb.add_wire(xl_fb[0], xl_fb[1], l300_right[0], xl_fb[1])
+    sb.add_wire(l300_right[0], xl_fb[1], l300_right[0], v33_y)
+    sb.add_junction(l300_right[0], v33_y)
 
     # ═══════════════════════════════════════════════════════════════════
-    # Power symbols: +3V3 on the V3V3 net, PWR_FLAG
+    # Power symbols and PWR_FLAGs
     # ═══════════════════════════════════════════════════════════════════
-    # +3V3 power symbol on output rail — place at C4 top
-    sb.place_power("+3V3", 207, 71.19)
+    # +3V3 power symbol on output rail — place at C303 top
+    sb.place_power("+3V3", c303_plus[0], c303_plus[1])
 
     # PWR_FLAG on +3V3, VIN, and GND to satisfy ERC
-    sb.place_power("PWR_FLAG", 192, 71.19)
-    sb.place_power("PWR_FLAG", 82, 71.19)
-    sb.place_power("PWR_FLAG", 82, 78.81)  # GND at C1 bottom
+    sb.place_power("PWR_FLAG", c302_plus[0], c302_plus[1])
+    sb.place_power("PWR_FLAG", c300_plus[0], c300_plus[1])
+    sb.place_power("PWR_FLAG", c300_minus[0], c300_minus[1])
 
     # ── Write output ──
     sb.write(OUTFILE)
