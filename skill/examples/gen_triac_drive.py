@@ -135,23 +135,20 @@ def add_channel(sb, cy, ch_name, gate_label, motor_label,
     triac_a2 = (triac_cx, triac_cy - 3.81)           # A2 (top)
     triac_a1 = (triac_cx, triac_cy + 3.81)           # A1 (bottom)
 
-    # MOC pin4 (MT, lower-right) connects to motor net — single hlabel here
+    # ── Motor net: MOC pin4 → TRIAC A1, with hlabel ──
+    # Horizontal bus at y = MOC pin4 level (cy+5.08)
+    motor_bus_y = moc_mt4[1]
     sb.add_hlabel(motor_label, moc_mt4[0], moc_mt4[1], 0, "passive")
+    # Wire from MOC pin4 to TRIAC A1 x, then up to A1
+    sb.add_wire(moc_mt4[0], motor_bus_y, triac_a1[0], motor_bus_y)
+    sb.add_wire(triac_a1[0], motor_bus_y, triac_a1[0], triac_a1[1])
+    sb.add_junction(moc_mt4[0], motor_bus_y)  # hlabel + wire branch
 
-    # TRIAC A1 → motor net via net label (hlabel already placed above)
-    sb.add_net_label(motor_label, triac_a1[0], triac_a1[1], 0)
-
-    # TRIAC A2 → AC_L (hlabel only on first channel, net label otherwise)
+    # ── AC_L net: TRIAC A2 (hlabel on first channel, net label otherwise) ──
     if place_ac_l_hlabel:
         sb.add_hlabel("AC_L", triac_a2[0], triac_a2[1], 0, "passive")
     else:
         sb.add_net_label("AC_L", triac_a2[0], triac_a2[1], 0)
-
-    # Motor net label below TRIAC A1 (connects snubber bottom to motor net)
-    motor_nlabel_y = triac_a1[1] + 7.62
-    sb.add_wire(triac_a1[0], triac_a1[1], triac_a1[0], motor_nlabel_y)
-    sb.add_net_label(motor_label, triac_a1[0], motor_nlabel_y, 0)
-    sb.add_junction(triac_a1[0], triac_a1[1])
 
     # ── R_gate: 360Ω, horizontal (angle=90) ──
     # Between MOC pin6 (upper-right) and TRIAC gate
@@ -198,14 +195,21 @@ def add_channel(sb, cy, ch_name, gate_label, motor_label,
         ["1", "2"],
     )
     # C_sn pin2 (top) at (sn_x, csn_cy-3.81) → wire from R_sn pin1
-    # C_sn pin1 (bottom) at (sn_x, csn_cy+3.81) → wire to motor net (TRIAC A1)
+    # C_sn pin1 (bottom) at (sn_x, csn_cy+3.81) → wire to motor net
     sb.add_wire(sn_x, rsn_cy + 3.81, sn_x, csn_cy - 3.81)  # R_sn → C_sn
 
-    # Connect snubber top (R_sn pin2) to AC_L net via net label
-    sb.add_net_label("AC_L", sn_x, rsn_cy - 3.81, 180)
+    # Snubber top (R_sn pin2) → TRIAC A2 (AC_L side) via wire
+    rsn_top = (sn_x, rsn_cy - 3.81)
+    sb.add_wire(triac_a2[0], triac_a2[1], sn_x, triac_a2[1])   # A2 right to snubber x
+    sb.add_wire(sn_x, triac_a2[1], rsn_top[0], rsn_top[1])      # down to R_sn pin2
+    sb.add_junction(triac_a2[0], triac_a2[1])  # hlabel/net_label also at A2
 
-    # Connect snubber bottom (C_sn pin1) to motor net via net label
-    sb.add_net_label(motor_label, sn_x, csn_cy + 3.81, 0)
+    # Snubber bottom (C_sn pin1) → motor bus via wire
+    csn_bot = (sn_x, csn_cy + 3.81)
+    sb.add_wire(triac_a1[0], motor_bus_y, sn_x, motor_bus_y)    # A1 bus right to snubber x
+    sb.add_wire(sn_x, motor_bus_y, csn_bot[0], csn_bot[1])      # up to C_sn pin1
+    sb.add_junction(triac_a1[0], motor_bus_y)  # MOC wire also at this point
+    sb.add_junction(sn_x, motor_bus_y)         # snubber branch
 
 
 def main():
