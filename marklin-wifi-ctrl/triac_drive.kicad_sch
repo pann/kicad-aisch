@@ -651,7 +651,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "57e3b388-9c8e-4e68-9f4b-24a3f802ff82")
+		(uuid "8b258d5b-3e32-409c-bc7f-ad4ad5afa424")
 		(property "Reference" "U800"
 			(at 80.01 50.61 0)
 			(effects (font (size 1.27 1.27)))
@@ -668,12 +668,12 @@
 			(at 80.01 54.61 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "583f9fb3-5f99-4cd7-93e2-d027c435bb44"))
-		(pin "2" (uuid "9f9cdbe8-6d0a-417d-aab3-4453c6583aed"))
-		(pin "3" (uuid "78615532-6e80-4979-8072-e2aace50bab7"))
-		(pin "4" (uuid "54a5e9e7-7915-44a4-9c80-43d29cb4e9ef"))
-		(pin "5" (uuid "c80eaa11-3299-471c-b493-19e4ed015dde"))
-		(pin "6" (uuid "2dd14614-6102-48aa-8003-ed18cf400ae7"))
+		(pin "1" (uuid "1b15709b-6516-4571-8705-f42ec586b445"))
+		(pin "2" (uuid "d4f8fc45-1350-41cf-8737-d492bae2923a"))
+		(pin "3" (uuid "0e2406cf-b646-4473-bf57-9cba008bc5f1"))
+		(pin "4" (uuid "a18b9ea3-0b7a-4ce7-899a-abff0bb0b0a9"))
+		(pin "5" (uuid "5e443d8c-1d7a-4047-bec5-695042d94f22"))
+		(pin "6" (uuid "70aef58c-a14e-4be4-89df-b8c0410050c2"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -686,7 +686,7 @@
 	(wire
 		(pts (xy 67.31 49.53) (xy 67.31 41.91))
 		(stroke (width 0) (type solid))
-		(uuid "aae49525-1de4-4388-b99f-972bf9ee9362")
+		(uuid "9b71009d-dbf2-4c13-9912-392c54355358")
 	)
 	(symbol
 		(lib_id "power:+3V3")
@@ -696,7 +696,7 @@
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
-		(uuid "1ee60ac5-1647-4681-a2ef-b9455e08d0c0")
+		(uuid "20e12215-d804-41e4-be97-786ae7b994c9")
 		(property "Reference" "#PWR0800"
 			(at 67.31 39.91 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -713,7 +713,7 @@
 			(at 67.31 41.91 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "4f0cb52d-57e3-4d20-87dd-fe09ed467be5"))
+		(pin "1" (uuid "6f72e866-9e7f-4957-a4e5-1d1aa701777d"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -731,7 +731,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f641fece-8956-4ec6-a04a-0f59d47ebd7a")
+		(uuid "688e0d38-cb4e-4195-a4a8-5d9ed52cbb4d")
 		(property "Reference" "R800"
 			(at 48.26 50.61 0)
 			(effects (font (size 1.27 1.27)))
@@ -748,8 +748,8 @@
 			(at 48.26 54.61 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "a4f2f2d4-81cf-45f1-986e-301243c305c1"))
-		(pin "2" (uuid "3233f287-168c-41b6-b7d0-28711fbbcc21"))
+		(pin "1" (uuid "15f45e96-4b7a-4a34-9be7-9c2438c352cd"))
+		(pin "2" (uuid "1ca586c5-76f3-4c46-99db-23008b3980cb"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -762,27 +762,27 @@
 	(wire
 		(pts (xy 52.07 54.61) (xy 67.31 54.61))
 		(stroke (width 0) (type solid))
-		(uuid "cd61e0c2-60fd-46e2-a949-a5bf04cd7d89")
+		(uuid "527902c6-40de-40db-aa43-ee6e2dc23d6e")
 	)
 	(wire
 		(pts (xy 36.83 54.61) (xy 44.45 54.61))
 		(stroke (width 0) (type solid))
-		(uuid "2d057134-7f01-4416-852f-19774ebeb860")
+		(uuid "2f053750-262d-4510-9334-974400a4c1ea")
 	)
 	(hierarchical_label "FWD_GATE"
 		(shape input)
 		(at 36.83 54.61 180)
 		(fields_autoplaced yes)
 		(effects (font (size 1.27 1.27)) (justify right bottom))
-		(uuid "ea2e59e7-438f-4229-9f51-66094822b7fc")
+		(uuid "cf3c371a-d69c-400b-9d04-e02dbe775dd8")
 	)
 	(no_connect
 		(at 67.31 59.69)
-		(uuid "787aa347-8ff2-4170-8d5b-bbe9ac89a7b1")
+		(uuid "5addc0c8-7470-488b-9f31-f7e54cc29eba")
 	)
 	(no_connect
 		(at 92.71 54.61)
-		(uuid "b5480344-23f0-4061-8f6f-b9c35ebf23e5")
+		(uuid "4b6e8a32-1271-4086-a49e-bee704466e2b")
 	)
 	(symbol
 		(lib_id "Device:Q_Triac")
@@ -792,7 +792,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b1dd4832-7906-4c7a-ad5e-80c5310a3658")
+		(uuid "79f5bd25-2898-420a-9b3e-a471d88ef727")
 		(property "Reference" "Q800"
 			(at 144.78 50.61 0)
 			(effects (font (size 1.27 1.27)))
@@ -809,9 +809,9 @@
 			(at 144.78 54.61 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "G" (uuid "d3f1bcff-732b-4caf-a231-c31e13efe760"))
-		(pin "A2" (uuid "5912f21e-0703-47fe-96fa-f09fe243dca9"))
-		(pin "A1" (uuid "4e9f614a-32eb-4e14-97f7-40a0c401d408"))
+		(pin "G" (uuid "f273588d-220c-42ce-87c9-d8b173aea1d2"))
+		(pin "A2" (uuid "029ffa6a-fb12-4e20-b1f1-669f2aa784c7"))
+		(pin "A1" (uuid "15737a89-1579-4235-aa6a-81f36312ab4a"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -822,44 +822,14 @@
 		)
 	)
 	(wire
-		(pts (xy 92.71 59.69) (xy 100.33 59.69))
-		(stroke (width 0) (type solid))
-		(uuid "e149507b-123e-4be9-83e9-419d4ecbeb57")
-	)
-	(hierarchical_label "MOTOR_FWD"
-		(shape passive)
-		(at 100.33 59.69 0)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "1cffc193-8244-4ae3-a5df-2058711882a3")
-	)
-	(wire
 		(pts (xy 92.71 59.69) (xy 144.78 59.69))
 		(stroke (width 0) (type solid))
-		(uuid "1a79dc38-5052-4abf-9f19-5f1a45c68023")
+		(uuid "fca83a56-fd69-42f7-b5af-2963d63ec7ab")
 	)
 	(wire
 		(pts (xy 144.78 59.69) (xy 144.78 58.42))
 		(stroke (width 0) (type solid))
-		(uuid "eaadcc40-8c53-4985-957d-8e9530b223a8")
-	)
-	(junction
-		(at 92.71 59.69)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "9c7aac5f-d328-424b-af3e-6fa255023a29")
-	)
-	(wire
-		(pts (xy 144.78 50.8) (xy 152.4 50.8))
-		(stroke (width 0) (type solid))
-		(uuid "d737d4b9-8dc0-42ef-84d9-a1d9bcca5abf")
-	)
-	(hierarchical_label "AC_L"
-		(shape passive)
-		(at 152.4 50.8 0)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "0040a658-790f-4ecb-99a7-136bfc772f57")
+		(uuid "93701a2e-e827-4ef5-b364-082a007bc42d")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -869,7 +839,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6618cfd5-34c5-4d83-a8ea-debed79e0e58")
+		(uuid "07832231-7a25-43e6-b589-5c6e13fee241")
 		(property "Reference" "R801"
 			(at 107.95 45.53 0)
 			(effects (font (size 1.27 1.27)))
@@ -886,8 +856,8 @@
 			(at 107.95 49.53 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "e2236011-9ee6-4fdc-9a92-d4271265b64c"))
-		(pin "2" (uuid "1fce7992-3ab8-4b63-be01-dab7281cb3d1"))
+		(pin "1" (uuid "a705b253-8675-4774-b76d-1c80b253092a"))
+		(pin "2" (uuid "dce15515-421c-49dc-bbb1-277640a1f6f4"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -900,17 +870,17 @@
 	(wire
 		(pts (xy 92.71 49.53) (xy 104.14 49.53))
 		(stroke (width 0) (type solid))
-		(uuid "1f0e699b-bc82-499d-98eb-7ee10f96778d")
+		(uuid "48d48351-7e95-4a8b-ad92-f5d112554282")
 	)
 	(wire
 		(pts (xy 111.76 49.53) (xy 111.76 57.15))
 		(stroke (width 0) (type solid))
-		(uuid "2de02f90-09f4-4e4c-800a-f8bc73696209")
+		(uuid "ce0b3606-1d09-4994-b28b-32d2d250f063")
 	)
 	(wire
 		(pts (xy 111.76 57.15) (xy 140.97 57.15))
 		(stroke (width 0) (type solid))
-		(uuid "25df4abd-b739-46c7-a56d-c159dfcf72d5")
+		(uuid "9b823f53-8bd4-4163-8347-3be4ff61288e")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -920,7 +890,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b7dfe124-b218-4234-9119-29f2aebaa284")
+		(uuid "80097224-dbe1-408a-a04e-0b6e91316e4d")
 		(property "Reference" "R802"
 			(at 165.1 48.07 0)
 			(effects (font (size 1.27 1.27)))
@@ -937,8 +907,8 @@
 			(at 165.1 52.07 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "c90c8a51-585b-4edf-ab28-1b7e945d841e"))
-		(pin "2" (uuid "72af9d68-8547-4150-848a-1e01e6b7a2a4"))
+		(pin "1" (uuid "81a90a67-fee3-4423-8db5-db1e396ae026"))
+		(pin "2" (uuid "a2c90191-101d-4003-b6ea-d1a906a372d9"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -956,7 +926,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "50991746-567b-4edf-bbf9-36c159f6b44a")
+		(uuid "db768605-018d-4b40-a376-716a98f27392")
 		(property "Reference" "C800"
 			(at 165.1 54.42 0)
 			(effects (font (size 1.27 1.27)))
@@ -973,8 +943,8 @@
 			(at 165.1 58.42 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "1bbf4da6-7e88-4220-9386-55a9aad1146b"))
-		(pin "2" (uuid "30440a84-a2b6-4ae4-80c5-90f21f13cb0f"))
+		(pin "1" (uuid "6c48eb47-4323-4554-af48-0d7ef9852ae2"))
+		(pin "2" (uuid "dca150e6-1723-4d4f-b783-1e23b21afd08"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -987,45 +957,69 @@
 	(wire
 		(pts (xy 165.1 55.88) (xy 165.1 54.61))
 		(stroke (width 0) (type solid))
-		(uuid "3a1cb2f0-55d8-428d-a10a-50fbadb70744")
+		(uuid "3377cbaf-7c86-4312-86d4-fb7b61d769a3")
 	)
 	(wire
-		(pts (xy 144.78 50.8) (xy 165.1 50.8))
+		(pts (xy 144.78 50.8) (xy 144.78 48.26))
 		(stroke (width 0) (type solid))
-		(uuid "712c08f6-715a-4e0e-a2c3-d47c1bae5e32")
+		(uuid "410dc2ca-0df5-4fa0-9547-13f97472054c")
 	)
 	(wire
-		(pts (xy 165.1 50.8) (xy 165.1 48.26))
+		(pts (xy 144.78 48.26) (xy 165.1 48.26))
 		(stroke (width 0) (type solid))
-		(uuid "05e64504-0e4d-40e9-97c9-c1b2a0a6d084")
-	)
-	(junction
-		(at 144.78 50.8)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f7d6ea59-9ea2-44cd-bdc3-9247d63caf7f")
+		(uuid "4eeeaff5-9e18-46cb-bca3-ad0fef4730a3")
 	)
 	(wire
-		(pts (xy 144.78 59.69) (xy 165.1 59.69))
+		(pts (xy 144.78 59.69) (xy 144.78 62.23))
 		(stroke (width 0) (type solid))
-		(uuid "b86627e0-abd5-4a69-af81-cc9695158be9")
+		(uuid "1b4befbb-ee86-4802-bd48-7457ba6958b0")
 	)
 	(wire
-		(pts (xy 165.1 59.69) (xy 165.1 62.23))
+		(pts (xy 144.78 62.23) (xy 165.1 62.23))
 		(stroke (width 0) (type solid))
-		(uuid "0f37b5cc-9f5d-4d87-aa6f-b6f3f88c919c")
+		(uuid "6e7a3876-a38e-4a75-a5b7-47df2417d96d")
 	)
 	(junction
 		(at 144.78 59.69)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "cb0cf73e-be6e-4f56-ab2f-cdae8362c9c1")
+		(uuid "34cc1c83-e582-43ea-955f-5e7386375b2e")
+	)
+	(wire
+		(pts (xy 165.1 48.26) (xy 172.72 48.26))
+		(stroke (width 0) (type solid))
+		(uuid "47c9ab39-7e13-46ad-b686-98cc9fe54ca5")
+	)
+	(hierarchical_label "AC_L"
+		(shape passive)
+		(at 172.72 48.26 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "7f645837-d0a7-44b8-ba1f-117883ba1b36")
 	)
 	(junction
-		(at 165.1 59.69)
+		(at 165.1 48.26)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "ab020759-21ea-4112-9782-c7c20f7098ba")
+		(uuid "01753c15-fc1f-4414-96be-15a6768c44f1")
+	)
+	(wire
+		(pts (xy 165.1 62.23) (xy 172.72 62.23))
+		(stroke (width 0) (type solid))
+		(uuid "fd377ea6-582b-41d4-9543-109ae9fdb415")
+	)
+	(hierarchical_label "MOTOR_FWD"
+		(shape passive)
+		(at 172.72 62.23 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "2d60b8d2-b6bf-436e-9ae5-b4e502716fec")
+	)
+	(junction
+		(at 165.1 62.23)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0d436b4c-4966-478e-83a5-4aa3ca6bd2f0")
 	)
 	(symbol
 		(lib_id "marklin-wifi-ctrl:MOC3021S-TA1")
@@ -1035,7 +1029,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0a888946-f084-4106-b35c-65632922a5f2")
+		(uuid "aeb16736-8e9a-47df-af93-ad50b154e238")
 		(property "Reference" "U801"
 			(at 80.01 106.49 0)
 			(effects (font (size 1.27 1.27)))
@@ -1052,12 +1046,12 @@
 			(at 80.01 110.49 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "c94f6fa4-7017-4a36-9fe0-8e33eaf89afa"))
-		(pin "2" (uuid "b9f4d45b-f48e-4563-a9bf-c7a216616d65"))
-		(pin "3" (uuid "8ef91f72-4ec6-49e8-a500-f3892440c222"))
-		(pin "4" (uuid "f064bde2-8f9c-4641-8e57-b2505f85d16a"))
-		(pin "5" (uuid "6241f721-9591-4b40-b55f-afe6755fefcc"))
-		(pin "6" (uuid "e3e164bc-9c02-43e8-bd03-1c84aacec049"))
+		(pin "1" (uuid "40c4f1b7-2d04-4e94-a93e-d7c14a755095"))
+		(pin "2" (uuid "0ddd72db-4c3c-4ccd-b898-0656bb8113b9"))
+		(pin "3" (uuid "244bf90b-022c-4bf3-ba71-10f157c53cce"))
+		(pin "4" (uuid "58e53651-3d16-4095-a095-5ee32036167e"))
+		(pin "5" (uuid "c56ba82e-2277-4311-9e52-9e6d4cd340b6"))
+		(pin "6" (uuid "18c460b5-a7cb-447b-af21-b7ea482452d5"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1070,7 +1064,7 @@
 	(wire
 		(pts (xy 67.31 105.41) (xy 67.31 97.79))
 		(stroke (width 0) (type solid))
-		(uuid "d3d9a6a1-2d58-4283-8524-e8ea78bcfb3c")
+		(uuid "6ee3313c-3e30-4430-a72f-d0193f947fe7")
 	)
 	(symbol
 		(lib_id "power:+3V3")
@@ -1080,7 +1074,7 @@
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
-		(uuid "101beaa1-80a5-4f89-9ae7-64fafd89e8ce")
+		(uuid "9b9f05cb-2469-451a-b537-6ad28aa9d3a7")
 		(property "Reference" "#PWR0801"
 			(at 67.31 95.79 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
@@ -1097,7 +1091,7 @@
 			(at 67.31 97.79 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "61dd7908-a9a9-4e64-98e9-0a3e359647a9"))
+		(pin "1" (uuid "2981b1fe-4157-4fcd-9405-91360f86efa5"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1115,7 +1109,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3ca5e458-4425-48db-80e7-4b1038288222")
+		(uuid "0315f0b0-a21c-4b85-b4fa-a5fa6289f877")
 		(property "Reference" "R803"
 			(at 48.26 106.49 0)
 			(effects (font (size 1.27 1.27)))
@@ -1132,8 +1126,8 @@
 			(at 48.26 110.49 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "6ca387a8-e60d-4b3c-8390-ab9bb8cf9453"))
-		(pin "2" (uuid "fffdb266-a49b-4883-8c9d-bb1586daeed1"))
+		(pin "1" (uuid "43fcc92f-2cca-432b-ade6-b1ae75b9ef22"))
+		(pin "2" (uuid "5be1e17d-3be0-49c5-94dd-1838517b0201"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1146,27 +1140,27 @@
 	(wire
 		(pts (xy 52.07 110.49) (xy 67.31 110.49))
 		(stroke (width 0) (type solid))
-		(uuid "6bf78dbb-7deb-4cda-82e4-7dfa15675846")
+		(uuid "6e6e847a-1f4f-4067-98c5-00570fb4f04d")
 	)
 	(wire
 		(pts (xy 36.83 110.49) (xy 44.45 110.49))
 		(stroke (width 0) (type solid))
-		(uuid "91850c4d-dc0c-4523-8317-858bbf7291c4")
+		(uuid "253bbcd4-db42-4c68-9348-3f6a1653e389")
 	)
 	(hierarchical_label "REV_GATE"
 		(shape input)
 		(at 36.83 110.49 180)
 		(fields_autoplaced yes)
 		(effects (font (size 1.27 1.27)) (justify right bottom))
-		(uuid "400461dc-1810-4997-831d-61ddc55cbcb2")
+		(uuid "7cbccde6-f094-4218-9039-6f2595fdac03")
 	)
 	(no_connect
 		(at 67.31 115.57)
-		(uuid "bffc8f41-a0a8-4e0c-9352-d655828e047e")
+		(uuid "5af57a29-c8e6-40d7-8aaf-545dd6050b0b")
 	)
 	(no_connect
 		(at 92.71 110.49)
-		(uuid "ef305851-b3b8-4699-8fc5-d7e26647aeea")
+		(uuid "6e74e4f0-6d0c-4daf-a0bd-9750045739ba")
 	)
 	(symbol
 		(lib_id "Device:Q_Triac")
@@ -1176,7 +1170,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8d29dfef-d90f-4ee5-9aed-60feb480966b")
+		(uuid "507bacb1-d68d-4297-89c2-0d36a1b8ef42")
 		(property "Reference" "Q801"
 			(at 144.78 106.49 0)
 			(effects (font (size 1.27 1.27)))
@@ -1193,9 +1187,9 @@
 			(at 144.78 110.49 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "G" (uuid "1f149b2d-4982-4e35-8059-e22dab7fe19a"))
-		(pin "A2" (uuid "f74539b6-c690-47af-aafd-b299f74f115a"))
-		(pin "A1" (uuid "a7150b32-8035-4da3-b98e-fe96e395d653"))
+		(pin "G" (uuid "d6f8014b-ad75-41d2-ae63-2b93d66bfc4c"))
+		(pin "A2" (uuid "ca786fd9-3c68-4ee4-841b-688b6d03960c"))
+		(pin "A1" (uuid "403c8d5c-9de6-4f32-9255-11348b6f41be"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1206,43 +1200,14 @@
 		)
 	)
 	(wire
-		(pts (xy 92.71 115.57) (xy 100.33 115.57))
-		(stroke (width 0) (type solid))
-		(uuid "51df9604-9717-4454-9a2b-160788f89529")
-	)
-	(hierarchical_label "MOTOR_REV"
-		(shape passive)
-		(at 100.33 115.57 0)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "effae9dc-f6aa-4a6f-8641-56fbd0b3e522")
-	)
-	(wire
 		(pts (xy 92.71 115.57) (xy 144.78 115.57))
 		(stroke (width 0) (type solid))
-		(uuid "ba49437a-4028-4d19-b408-d251b3f51f78")
+		(uuid "01fe3c96-54ea-4c89-8cf1-4ae202a937a7")
 	)
 	(wire
 		(pts (xy 144.78 115.57) (xy 144.78 114.3))
 		(stroke (width 0) (type solid))
-		(uuid "2d1927c1-329c-4a95-8e8e-06b811f9e009")
-	)
-	(junction
-		(at 92.71 115.57)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "6216cab1-46fb-43bd-b9a8-0527706c6021")
-	)
-	(wire
-		(pts (xy 144.78 106.68) (xy 152.4 106.68))
-		(stroke (width 0) (type solid))
-		(uuid "7d3cdb29-69c6-4874-a695-12a4e19b2922")
-	)
-	(label "AC_L"
-		(at 152.4 106.68 0)
-		(fields_autoplaced yes)
-		(effects (font (size 1.27 1.27)) (justify left bottom))
-		(uuid "1360c7de-382c-4905-891c-bfcdfad78d57")
+		(uuid "23602a43-4dc1-4465-b0dc-cdf3e8349013")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -1252,7 +1217,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "045c9fca-c406-4768-8895-46cbf372bb92")
+		(uuid "ba9f8831-8949-4cba-8685-2cf8729550ef")
 		(property "Reference" "R804"
 			(at 107.95 101.41 0)
 			(effects (font (size 1.27 1.27)))
@@ -1269,8 +1234,8 @@
 			(at 107.95 105.41 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "7a7c142e-9e16-45a2-a40f-e4d0187e3cb4"))
-		(pin "2" (uuid "7cff4a31-e0dc-4079-9d66-57e3ba05266f"))
+		(pin "1" (uuid "6b7a425f-afea-40bc-a71d-09d4d01aef7f"))
+		(pin "2" (uuid "76f3433e-8799-4a63-a66e-abd442b406e8"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1283,17 +1248,17 @@
 	(wire
 		(pts (xy 92.71 105.41) (xy 104.14 105.41))
 		(stroke (width 0) (type solid))
-		(uuid "93f71d1c-c8bb-4273-8e32-74e26b7ae191")
+		(uuid "97e71d8c-5478-4656-b40a-00cfae2d19c3")
 	)
 	(wire
 		(pts (xy 111.76 105.41) (xy 111.76 113.03))
 		(stroke (width 0) (type solid))
-		(uuid "b072e5a3-6c7e-4bd1-baad-dfe995b9ca1e")
+		(uuid "c6b8d8ac-3895-4be3-9a9c-84297f559be9")
 	)
 	(wire
 		(pts (xy 111.76 113.03) (xy 140.97 113.03))
 		(stroke (width 0) (type solid))
-		(uuid "dd924ead-d769-4efa-8012-7b0440e6d906")
+		(uuid "d90a4a27-70cf-406e-b427-4f6f74122277")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -1303,7 +1268,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8a0ea404-a050-4d90-95ea-1d9e3540f757")
+		(uuid "c0dd4cc6-2c88-4441-a8b1-5064fc7fc7e5")
 		(property "Reference" "R805"
 			(at 165.1 102.68 0)
 			(effects (font (size 1.27 1.27)))
@@ -1320,8 +1285,8 @@
 			(at 165.1 106.68 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "207666ff-7136-4ac9-b522-ade9fb9cf1bd"))
-		(pin "2" (uuid "cf290f2f-9076-4923-8db8-b8b0a90c8e97"))
+		(pin "1" (uuid "140bfa7e-2b77-4b1e-b3be-0631cf39c079"))
+		(pin "2" (uuid "dadf4cf1-54d5-4da7-9734-85dc2b29bdae"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1339,7 +1304,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "032205f1-dd6e-4beb-a728-779415b94e90")
+		(uuid "42f98b5e-6d22-4598-bd10-ea04d71b9f04")
 		(property "Reference" "C801"
 			(at 165.1 109.03 0)
 			(effects (font (size 1.27 1.27)))
@@ -1356,8 +1321,8 @@
 			(at 165.1 113.03 0)
 			(effects (font (size 1.27 1.27)) (hide yes))
 		)
-		(pin "1" (uuid "680668b0-f992-428e-b8f1-f376783e82ea"))
-		(pin "2" (uuid "749d8a67-d09f-4558-b38c-3c4093d174f3"))
+		(pin "1" (uuid "e0ad6f1c-68b8-4ce7-940a-3a82aa014458"))
+		(pin "2" (uuid "707ce207-8849-47d2-bb01-75951a63f570"))
 		(instances
 			(project "marklin-wifi-ctrl"
 				(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"
@@ -1370,45 +1335,68 @@
 	(wire
 		(pts (xy 165.1 110.49) (xy 165.1 109.22))
 		(stroke (width 0) (type solid))
-		(uuid "8a617405-7a73-4852-b0b2-6d5770db16ea")
+		(uuid "157f81ef-5e55-4416-af69-70626c8187bc")
 	)
 	(wire
-		(pts (xy 144.78 106.68) (xy 165.1 106.68))
+		(pts (xy 144.78 106.68) (xy 144.78 102.87))
 		(stroke (width 0) (type solid))
-		(uuid "65dadc1f-164a-42ae-9171-3458f3819d3f")
+		(uuid "33687825-87aa-48c9-acfc-535fa514cc94")
 	)
 	(wire
-		(pts (xy 165.1 106.68) (xy 165.1 102.87))
+		(pts (xy 144.78 102.87) (xy 165.1 102.87))
 		(stroke (width 0) (type solid))
-		(uuid "379aae3e-99a4-458a-aa76-503f0ec4380b")
-	)
-	(junction
-		(at 144.78 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "6838dbb0-9015-40d0-a83b-b44af6f30ff7")
+		(uuid "a3cd80f9-1976-4b9d-b9f9-b2a381686872")
 	)
 	(wire
-		(pts (xy 144.78 115.57) (xy 165.1 115.57))
+		(pts (xy 144.78 115.57) (xy 144.78 116.84))
 		(stroke (width 0) (type solid))
-		(uuid "52a29f36-613f-4b38-b20d-d449f08eb14e")
+		(uuid "738f4952-49b2-4b1f-a246-29233ad526b6")
 	)
 	(wire
-		(pts (xy 165.1 115.57) (xy 165.1 116.84))
+		(pts (xy 144.78 116.84) (xy 165.1 116.84))
 		(stroke (width 0) (type solid))
-		(uuid "5061c6dd-6b41-4178-bd71-096e4992bab7")
+		(uuid "c088ca50-2e05-474c-bb1a-378ff4ba60d3")
 	)
 	(junction
 		(at 144.78 115.57)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "b4a9c02e-f5e3-4531-b9d7-827063cdf4c1")
+		(uuid "f1c7772f-0154-429b-bbd2-ebde261ecce1")
+	)
+	(wire
+		(pts (xy 165.1 102.87) (xy 172.72 102.87))
+		(stroke (width 0) (type solid))
+		(uuid "554dd143-58c8-44fa-b334-8674f3dcb058")
+	)
+	(label "AC_L"
+		(at 172.72 102.87 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "90fb783a-68bb-4415-b4ab-ea89c22af21b")
 	)
 	(junction
-		(at 165.1 115.57)
+		(at 165.1 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "22836149-ccf9-4679-81f2-6982522645de")
+		(uuid "be5a3cb8-8f1a-42c7-a624-0132ebe00a5e")
+	)
+	(wire
+		(pts (xy 165.1 116.84) (xy 172.72 116.84))
+		(stroke (width 0) (type solid))
+		(uuid "dd91f04e-f4d9-43d9-b4fb-d8bb1a7788dd")
+	)
+	(hierarchical_label "MOTOR_REV"
+		(shape passive)
+		(at 172.72 116.84 0)
+		(fields_autoplaced yes)
+		(effects (font (size 1.27 1.27)) (justify left bottom))
+		(uuid "6c56fd53-07b1-4efc-9278-f1625e90e39b")
+	)
+	(junction
+		(at 165.1 116.84)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "84f534bb-6b38-4546-9ddb-48052ebc4289")
 	)
 	(sheet_instances
 		(path "/5dc91ac1-0911-4dbb-9ad6-5d1b9efb7191/f8d2bd66-e175-4605-8831-92b6c419f451"

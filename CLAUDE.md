@@ -88,6 +88,8 @@ All label functions place the label at a STUB offset from the pin tip:
 - **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
 - Prefer direct wires between components over net labels for readability. Use net labels only when wires would cross or span long distances.
 - Use junctions where three or more wire segments meet at the same point.
+- **Wires must extend OUT from component pins** — never route a wire back into or through a component body. Route around components so wires approach pins from outside.
+- **Output hlabels on rightmost symbols** — place input hlabels on the left side of the circuit and output hlabels on the rightmost symbols for left-to-right signal flow readability.
 
 ## Schematic Design Rules
 
