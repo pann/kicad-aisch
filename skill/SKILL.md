@@ -313,10 +313,6 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
 - Every PCB solder pad needs a schematic symbol
 - Use `Connector:TestPoint` with `TestPoint:TestPoint_Pad_2.0x2.0mm` footprint as default
 
-### USB-C 14P Connectors
-- easyeda2kicad USB-C 14P connectors have separate A-side and B-side data pins at different symbol positions
-- Both sides must be wired: connect B7->A7 (D-) and B6->A6 (D+) with wires + junctions
-
 ---
 
 ## ERC Configuration
