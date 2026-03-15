@@ -167,8 +167,9 @@ def main():
     sb.add_junction(gnd_col, p14_y)                # T-junction for pin 14 wire
 
     # ── +3V3 on pin 3 ──
-    # Wire LEFT first — stub going UP would cross GND pins 1,2 above
-    v33_col = lx - 2 * STUB - 2.54  # x column for +3V3 (clear of cap row at x≈95)
+    # Wire LEFT to +3V3 symbol — avoid same x as EN pull-up (en_jx=100 → 100.33)
+    # to prevent overlapping collinear +3V3 stubs (GUI merges them, losing endpoints)
+    v33_col = lx - STUB  # short stub left, at different x from EN pull-up
     p3x, p3y = lpin(3)
     sb.add_wire(p3x, p3y, v33_col, p3y)
     sb.place_power("+3V3", v33_col, p3y)
