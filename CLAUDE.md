@@ -91,6 +91,7 @@ All label functions place the label at a STUB offset from the pin tip:
 - **Wires must extend OUT from component pins** — never route a wire back into or through a component body. Route around components so wires approach pins from outside.
 - **Output hlabels on rightmost symbols** — place input hlabels on the left side of the circuit and output hlabels on the rightmost symbols for left-to-right signal flow readability.
 - **No overlapping collinear wires** — KiCad GUI merges overlapping wires at the same x or y, losing intermediate pin endpoints. Ensure power symbol stubs and bus wires at the same coordinate don't overlap vertically or horizontally.
+- **All wires must be horizontal or vertical** — no diagonal wires. Use L-shaped bends (two segments) to connect points that aren't aligned.
 
 ## Schematic Design Rules
 

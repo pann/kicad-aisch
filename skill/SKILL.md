@@ -163,13 +163,13 @@ If $ARGUMENTS specifies a phase number (e.g., "phase 3" or "resume at block desi
 3. For each block, write a generator script (`scripts/gen_<block>.py`) that:
    - Uses `SchematicBuilder` from `kicad_sch_gen.py`
    - Loads required symbols with `sb.add_lib()`
-   - Places components with `sb.place_sym()`
-   - Routes wires with `sb.add_wire()`
+   - Places components with `sb.place_sym()` + `sb.register_pin()` for each pin
+   - Routes wires with `sb.add_wire()` following the Wiring Recipes
    - Adds hierarchical labels matching the block interfaces from Phase 3
    - Adds power symbols with `sb.place_power()`
-   - Writes the `.kicad_sch` file with `sb.write()`
+   - Writes the `.kicad_sch` file with `sb.write()` — **must print `[CLEAN]`**
 4. Write `gen_top_level.py` for the root schematic (sheet frames + global labels)
-5. Run all generators
+5. Run all generators — **fix all validation warnings before proceeding**
 6. Run ERC: `kicad-cli sch erc --output /tmp/erc.rpt --exit-code-violations <root.kicad_sch>`
 7. Fix any ERC errors, re-run until clean
 8. Export SVG for visual verification: `kicad-cli sch export svg --output /tmp/ <root.kicad_sch>`
@@ -257,8 +257,9 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
   - `mirror`: `"x"` or `"y"` axis, or `None`
 
 - `sb.place_power(net_name, x, y)` — Place power symbol with auto wire stub
-  - GND variants: symbol placed at `y + 7.62` (below), stub wire down
-  - VCC/+3V3/etc: symbol placed at `y - 7.62` (above), stub wire up
+  - GND variants: symbol placed at `y + 7.62` (below), stub wire down, arrow points down
+  - Negative rails (`-5V`, `-5VA`, `-6V`, etc.): same as GND — stub DOWN, arrow points down
+  - Positive rails (`+3V3`, `+5V`, `+5VA`, etc.): symbol at `y - 7.62` (above), stub wire up, arrow points up
   - PWR_FLAG: placed directly at (x, y), no stub
 
 ### Wiring and Labels
@@ -270,15 +271,39 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
   - `shape`: `"input"`, `"output"`, `"bidirectional"`, `"passive"`
 - `sb.add_global_label(name, x, y, angle, shape)` — Global label with STUB wire
 
+### Pin & Body Registration (for validation)
+- `sb.register_pin(x, y, ref="", pin="")` — Register a pin tip position for mid-wire checks
+- `sb.register_body(cx, cy, half_w, half_h, angle=0, ref="")` — Register component body rectangle for wire-through-body checks
+
+**Fence constants** for common passives — keep-out zone covering body + pins + 1.27mm clearance:
+- `BODY_R = (2.54, 5.08)` — Device:R fence (body + pins + clearance)
+- `BODY_C = (3.81, 5.08)` — Device:C fence (wider plates + pins + clearance)
+- `BODY_L = (2.54, 5.08)` — Device:L fence (same as R)
+- `BODY_LED = (5.08, 2.54)` — Device:LED fence (horizontal pins + clearance)
+- `BODY_D = (5.08, 2.54)` — Device:D fence (same as LED)
+
+**Auto-registration**: `place_sym("Device:R", ...)` automatically registers both the fence AND the pin positions. No manual `register_body()` or `register_pin()` calls needed for standard passives.
+
+**Pin exemption**: Wires connecting to a registered pin of the component are allowed inside the fence. Only non-connecting wires are flagged.
+
+For ICs, manually register the fence:
+```python
+sb.register_body(cx, cy, max_pin_x - 2.54, max_pin_y + 1.27, angle=0, ref="U1")
+```
+
+### Validation
+- `sb.validate()` — Run all wiring checks, return list of issue strings (empty = clean)
+
 ### Output
 - `sb.assemble()` — Return complete schematic as string
-- `sb.write(filepath)` — Write `.kicad_sch` file
+- `sb.write(filepath, validate=True)` — Write `.kicad_sch` file (runs validation by default)
 
 ---
 
 ## Coordinate Conventions
 
 - **All coordinates in mm**, snapped to 1.27mm grid via `snap()`
+- **Hierarchical sheet boxes and their pins must also be snapped** — SchematicBuilder auto-snaps wires/labels, but raw s-expression sheet entries (position, size, pin coordinates) must be manually snapped with `snap()`. If sheet pin positions are off-grid, wires from SchematicBuilder won't connect to them and KiCad ERC will report `hier_label_mismatch` and `unconnected_wire_endpoint` errors.
 - **STUB = 7.62mm** — wire stub length for all labels and power symbols
 - **Symbol libraries use Y-up; schematics use Y-down**
   - Schematic pin position: `(origin_x + sym_x, origin_y - sym_y)` for angle=0
@@ -296,21 +321,283 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
 - Verify readability with SVG export after generation
 
 ### Wiring Rules
-- **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
-- Prefer direct wires between components over net labels for readability. Use net labels only when wires would cross or span long distances.
-- Use junctions where three or more wire segments meet at the same point.
-- **Wires must extend OUT from component pins** — never route a wire back into or through a component body. Route around components so wires approach pins from outside.
-- **Output hlabels on rightmost symbols** — place input hlabels on the left side of the circuit and output hlabels on the rightmost symbols for left-to-right signal flow readability.
-- **No overlapping collinear wires** — KiCad GUI merges overlapping wires at the same x or y, losing intermediate pin endpoints. Ensure power symbol stubs and bus wires at the same coordinate don't overlap vertically or horizontally.
+
+These rules are enforced by `sb.validate()` which runs automatically on `sb.write()`. Fix all ERRORs and WARNINGs before declaring a sheet complete.
+
+1. **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
+2. **Prefer direct wires over net labels** — Use net labels only when wires would cross or span long distances (>50mm). For nearby connections, use a wire.
+3. **Add junctions at T-intersections** — Where three or more wire endpoints meet, add `sb.add_junction()`.
+4. **Wires must extend OUT from component pins** — Never route a wire back into or through a component body. Route around components so wires approach pins from outside.
+5. **Output hlabels on rightmost symbols** — Place input hlabels on the left side and output hlabels on the rightmost symbols for left-to-right signal flow.
+6. **No overlapping collinear wires** — KiCad merges overlapping wires at the same x or y, losing intermediate endpoints. This includes label stubs and power stubs.
+7. **All wires must be horizontal or vertical** — No diagonal wires. Use L-shaped bends.
+8. **One hlabel per net per sheet** — Use `add_net_label()` for additional connections to the same net.
+9. **Register pins for validation** — After `place_sym()`, call `sb.register_pin(x, y, ref, pin)` for each pin. The validator checks registered pins don't fall mid-wire.
+
+---
+
+## Wiring Recipes
+
+Concrete patterns that prevent the most common wiring violations. Each recipe shows the WRONG way (what causes errors) and the RIGHT way.
+
+### Recipe 1: Connecting an IC pin to a horizontal bus above
+
+**Problem**: IC has VIN at (82, 62). Bus is at y=40. Other pins (SW, GND) are on the same x-column between VIN and the bus.
+
+**WRONG** — straight vertical wire through other pins:
+```python
+sb.add_wire(82, 62, 82, 40)  # passes through SW at (82,60) and GND at (82,57)
+```
+
+**RIGHT** — route out sideways first, then up, avoiding the pin column:
+```python
+escape_x = 82 - 5.08  # step left, away from pin column
+sb.add_wire(82, 62, escape_x, 62)        # horizontal escape
+sb.add_wire(escape_x, 62, escape_x, 40)  # vertical to bus
+sb.add_wire(escape_x, 40, 82, 40)        # horizontal to bus tap point
+sb.add_junction(82, 40)                   # if bus wire passes through
+```
+
+**General rule**: For any IC pin, first route OUTWARD (left-side pins go left, right-side pins go right), then route vertically to the destination.
+
+### Recipe 2: Multi-tap horizontal bus wire
+
+**Problem**: A horizontal bus at y=40 needs to connect to components at x=55, x=82, x=108. Components connect via vertical drop wires.
+
+**WRONG** — single long wire with T-junctions:
+```python
+sb.add_wire(40, 40, 260, 40)  # one long segment
+sb.add_wire(55, 40, 55, 52)   # drop to component
+sb.add_wire(82, 40, 82, 62)   # drop to component
+# Problem: (55,40) and (82,40) fall mid-wire on the bus segment
+```
+
+**RIGHT** — break bus into segments ending at each tap:
+```python
+sb.add_wire(40, 40, 55, 40)    # segment 1
+sb.add_wire(55, 40, 82, 40)    # segment 2
+sb.add_wire(82, 40, 108, 40)   # segment 3
+sb.add_wire(108, 40, 260, 40)  # segment 4
+# Now drops connect at segment endpoints:
+sb.add_wire(55, 40, 55, 52)
+sb.add_junction(55, 40)
+sb.add_wire(82, 40, 82, 62)
+sb.add_junction(82, 40)
+```
+
+**General rule**: Every point where another wire meets a bus must be a segment endpoint, not a midpoint.
+
+### Recipe 3: Power symbol stubs — avoiding overlaps
+
+**Problem**: Two GND symbols on the same IC at the same x-coordinate create overlapping vertical stubs.
+
+`place_power("GND", x, y)` creates a wire from (x, y) down to (x, y+7.62). If two GND stubs share the same x and their y-ranges overlap, KiCad merges them.
+
+**WRONG** — two GND stubs at same x:
+```python
+sb.place_power("GND", 100, 80)   # stub: (100, 80) to (100, 87.62)
+sb.place_power("GND", 100, 75)   # stub: (100, 75) to (100, 82.62)
+# Overlap at y=80 to y=82.62!
+```
+
+**RIGHT** — offset x for the second GND, connect with a wire:
+```python
+sb.place_power("GND", 100, 80)   # first pin gets direct GND
+gnd_x = 100 + 5.08               # offset second GND sideways
+sb.add_wire(100, 75, gnd_x, 75)  # horizontal escape
+sb.place_power("GND", gnd_x, 75) # GND at offset position
+```
+
+**Alternative** — use a shared GND bus wire:
+```python
+gnd_bus_y = 90  # below both pins
+sb.add_wire(100, 80, 100, gnd_bus_y)
+sb.add_wire(100, 75, 100, 80)     # connect second pin to first wire
+sb.add_junction(100, 80)
+sb.place_power("GND", 100, gnd_bus_y)
+```
+
+The same applies to VCC stubs going upward. Check y-ranges: VCC stubs go from y to y-7.62.
+
+### Recipe 4: Net label stubs — hidden wire awareness
+
+Every `add_net_label()` and `add_hlabel()` creates a 7.62mm wire stub. This stub is a real wire that can overlap with other wires.
+
+**WRONG** — explicit wire overlaps label stub:
+```python
+sb.add_wire(50, 60, 60, 60)         # explicit wire
+sb.add_net_label("SIG", 60, 60, 0)  # stub from (60,60) to (67.62,60)
+sb.add_wire(60, 60, 70, 60)         # overlaps the stub!
+```
+
+**RIGHT** — let the stub BE the wire, or start the explicit wire where the stub ends:
+```python
+sb.add_wire(50, 60, 60, 60)         # wire to pin
+sb.add_net_label("SIG", 60, 60, 0)  # stub from (60,60) to (67.62,60) — this IS the connection
+# No additional wire needed — the label stub connects at (60,60)
+```
+
+### Recipe 5: IC pin routing — never through the body
+
+**Problem**: Need to wire an op-amp's output back to -IN for feedback. Both pins are on the same IC.
+
+**WRONG** — wire through the IC body:
+```python
+# OPA output at (111.43, 72.38), -IN at (111.43, 74.92)
+sb.add_wire(111.43, 72.38, 111.43, 74.92)  # vertical through IC body
+```
+
+**RIGHT** — route outside the body:
+```python
+out_pin = (111.43, 72.38)
+nin_pin = (111.43, 74.92)
+fb_x = 111.43 + 15  # route right, outside the body
+sb.add_wire(out_pin[0], out_pin[1], fb_x, out_pin[1])  # horizontal out
+sb.add_wire(fb_x, out_pin[1], fb_x, nin_pin[1])        # vertical
+sb.add_wire(fb_x, nin_pin[1], nin_pin[0], nin_pin[1])   # horizontal back
+```
+
+**General rule**: Left-side IC pins → route LEFT then around. Right-side pins → route RIGHT then around. Top pins → route UP. Bottom → DOWN. Never cross through the component rectangle.
+
+### Recipe 6: Computing connector pin positions
+
+Connector pins are NOT at the component center. They have specific offsets that vary by symbol.
+
+**Common mistake**: Assuming pins are at `(cx + 3.81, cy + offset)` when they're actually at `(cx - 5.08, cy + offset)`.
+
+**Process**: Before wiring to any non-trivial symbol:
+1. Open the `.kicad_sym` file or use KiCad's symbol editor
+2. Find each pin's library coordinates: `(pin ... (at X Y angle))`
+3. Apply the rotation transform to get schematic coordinates
+4. Register pins for validation:
+
+```python
+# Example: Conn_01x04 at (100, 45), angle=0
+# Library pins are at (-5.08, 2.54), (-5.08, 0), (-5.08, -2.54), (-5.08, -5.08)
+# Schematic (y-flip): pin_x = 100 + (-5.08) = 94.92
+#                      pin1_y = 45 - 2.54 = 42.46, pin2_y = 45 - 0 = 45, etc.
+conn_pins = [(94.92, 42.46), (94.92, 45.0), (94.92, 47.54), (94.92, 50.08)]
+for i, (px, py) in enumerate(conn_pins):
+    sb.register_pin(px, py, "J1", str(i + 1))
+```
+
+### Recipe 7: LED polarity for left-to-right current flow
+
+**WRONG** — LED at angle=0 has current flowing right-to-left (A→K):
+```python
+# angle=0: K(cathode) at left (-3.81, 0), A(anode) at right (+3.81, 0)
+# Current flows: right(A) → left(K) — BACKWARDS for left-to-right signal flow
+sb.place_sym("Device:LED", lx+15, ly, 0, "D1", "GREEN", fp, ["1", "2"])
+sb.add_wire(lx+3.81, ly, lx+15-3.81, ly)   # R → cathode (wrong!)
+sb.place_power("GND", lx+15+3.81, ly)       # GND at anode (wrong!)
+```
+
+**RIGHT** — use angle=180 for left-to-right current flow:
+```python
+# angle=180: A(anode) at left (-3.81, 0), K(cathode) at right (+3.81, 0)
+# Current flows: left(A) → right(K) — correct for left-to-right signal flow
+# Circuit: GPIO → R → A(left) → K(right) → GND
+sb.place_sym("Device:LED", lx+15, ly, 180, "D1", "GREEN", fp, ["1", "2"])
+sb.add_wire(lx+3.81, ly, lx+15-3.81, ly)   # R pin1 → anode
+sb.place_power("GND", lx+15+3.81, ly)       # GND at cathode
+```
+
+### Recipe 8: Facing hierarchical sheet pins — direct wires vs labels
+
+**Problem**: Two sheet boxes face each other with a 45mm gap. Their pins carry the same signals.
+
+**WRONG** — global labels for every facing pair:
+```python
+# Sheet A right-side pin at (76.20, 106.68)
+glabel("SPI_MOSI", 76.20 + STUB, 106.68, 0)
+# Sheet B left-side pin at (121.92, 106.68) — same y!
+glabel("SPI_MOSI", 121.92 - STUB, 106.68, 180)
+# Creates two redundant global labels when a wire would work
+```
+
+**RIGHT** — direct wire for facing pins at same y:
+```python
+sb.add_wire(76.20, 106.68, 121.92, 106.68)  # direct horizontal connection
+```
+
+**RIGHT** — L-bend wire for facing pins at different y:
+```python
+# Sheet A pin at (76.20, 106.68), Sheet B pin at (121.92, 111.76)
+mid_x = (76.20 + 121.92) / 2  # or snap to grid
+sb.add_wire(76.20, 106.68, mid_x, 106.68)
+sb.add_wire(mid_x, 106.68, mid_x, 111.76)
+sb.add_wire(mid_x, 111.76, 121.92, 111.76)
+```
+
+**Use global labels only when**: pins are on different rows/columns with many intervening sheets, or wires would need to cross other sheet boxes.
+
+---
+
+## Validation
+
+`SchematicBuilder.validate()` runs automatically when you call `sb.write()`. It checks:
+
+| Check | Type | What it catches |
+|-------|------|-----------------|
+| Diagonal wires | ERROR | Non-orthogonal wire segments |
+| Duplicate hlabels | ERROR | Same hlabel name used twice on one sheet |
+| Overlapping collinear wires | WARNING | Wire segments on same line with overlapping ranges |
+| Mid-wire points | WARNING | Wire endpoints or registered pins falling inside another segment |
+| Missing junctions | WARNING | 3+ wire endpoints meeting without a junction marker |
+| Wire through fence | WARNING | Wire inside component keep-out zone without connecting to a pin |
+
+### Using `register_pin()` for pin validation
+
+After placing a component, register its pin positions so the validator can check they don't fall mid-wire:
+
+```python
+sb.place_sym("Device:R", 80, 60, 0, "R1", "1k", fp, ["1", "2"])
+sb.register_pin(80, 63.81, "R1", "1")  # pin1 bottom
+sb.register_pin(80, 56.19, "R1", "2")  # pin2 top
+```
+
+For ICs with many pins, create a helper:
+```python
+def register_ic_pins(sb, cx, cy, pin_offsets, ref):
+    """Register IC pins from library offsets (y-up) to schematic coords (y-down)."""
+    for pin_num, (lib_x, lib_y) in pin_offsets.items():
+        sb.register_pin(cx + lib_x, cy - lib_y, ref, pin_num)
+```
+
+### Workflow gate
+
+A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
+1. Write the generator script
+2. Run it — check validation output
+3. Fix all ERRORs and WARNINGs
+4. Re-run until `[CLEAN]`
+5. Run ERC: `kicad-cli sch erc --exit-code-violations`
+6. Export SVG for visual check
 
 ---
 
 ## Schematic Design Rules
 
+### Power Rails Are Global — Use Power Symbols, Never Hlabels
+- All power rails and GND nets shall use **KiCad power symbols** (`sb.place_power()`), not hierarchical labels or global labels.
+- Power symbols create global nets automatically — they connect across ALL sheets without wiring through the hierarchy.
+- **Never** use `add_hlabel()` for power/GND. **Never** add power pins to hierarchical sheet boxes.
+- Use only power net names that exist in the KiCad standard power library. Common names:
+  `GND`, `+3V3`, `+5V`, `+5VA`, `-5VA`, `+5VD` (digital), `+12V`, `-5V`, `-6V`
+- **Never** invent custom power net names (e.g. `+5V_DIG`, `+6V5`). Use the closest standard name, or keep custom names as local `add_net_label()` within a single sheet.
+- The power supply sheet places `place_power("+5VA", x, y)` at its output; all other sheets place the same `place_power("+5VA", x, y)` at their consumption points. KiCad connects them globally.
+- **One PWR_FLAG per net** — place it on the power supply sheet where the rail is created. Do not add duplicate PWR_FLAGs on the same net in other sheets.
+- This eliminates power wiring on parent pages and keeps the hierarchy clean — only signal pins appear on sheet boxes.
+
 ### One Hierarchical Label Per Net Per Sheet
 - Each `add_hlabel()` name may appear only ONCE per sheet
 - For additional connections to the same net, use `add_net_label()` with the same name
 - This causes `same_local_global_label` ERC warnings — suppress in project settings (see below)
+
+### No Redundant Labels — Keep Schematics Clean
+- If an hlabel connects directly to a component pin (via its stub wire or a short wire), do **not** add a duplicate `add_net_label()` for that same net on the same page unless it is needed elsewhere on the sheet.
+- Only add a net label when the signal must fan out to multiple locations on the same page.
+- Redundant labels clutter the schematic and make it harder to read.
 
 ### Symbol Libraries Are Read-Only
 - Never modify `.kicad_sym` files

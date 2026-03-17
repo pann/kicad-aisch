@@ -50,10 +50,30 @@ Usage:
 
 import re
 import uuid as _uuid
+from collections import defaultdict
 
 
 STUB = 7.62  # Wire stub length (mm) — standard KiCad grid spacing
 GRID = 1.27  # KiCad 50-mil fine grid (mm)
+
+# Component fence half-sizes (keep-out zone covering body + pins + 1.27mm clearance).
+# Any wire inside this zone that does NOT connect to a registered pin is flagged.
+# Format: (half_width, half_height) — centered on symbol origin, before rotation.
+BODY_R   = (2.54, 5.08)    # Device:R — body(1.016)+clearance, pins(3.81)+clearance
+BODY_C   = (3.81, 5.08)    # Device:C — plates(2.032)+clearance, pins(3.81)+clearance
+BODY_L   = (2.54, 5.08)    # Device:L — same fence as R
+BODY_LED = (5.08, 2.54)    # Device:LED — horiz pins(3.81)+clearance, body(1.27)+clearance
+BODY_D   = (5.08, 2.54)    # Device:D — same fence as LED
+
+# Schematic pin offsets for auto-registration (angle=0, Y-down coords).
+# Rotation is applied automatically in place_sym().
+_PASSIVE_PINS = {
+    "Device:R":   [(0, 3.81), (0, -3.81)],     # pin1 bottom, pin2 top
+    "Device:C":   [(0, 3.81), (0, -3.81)],
+    "Device:L":   [(0, 3.81), (0, -3.81)],
+    "Device:LED": [(-3.81, 0), (3.81, 0)],      # K left, A right
+    "Device:D":   [(-3.81, 0), (3.81, 0)],
+}
 
 
 def snap(v, grid=GRID):
@@ -343,6 +363,13 @@ class SchematicBuilder:
         self._elements = []
         self._pwr_counter = pwr_start
 
+        # Validation tracking
+        self._wires = []            # [(x1, y1, x2, y2), ...] all wire segments
+        self._junctions = set()     # {(x, y), ...}
+        self._hlabel_names = defaultdict(list)  # name -> [(x, y), ...]
+        self._pins = []             # [(x, y, ref, pin_num), ...] registered pins
+        self._bodies = []           # [(x1, y1, x2, y2, ref), ...] component body rects
+
     @property
     def inst_path(self):
         """Instance path for this sheet: /<root_uuid>/<sheet_inst_uuid>."""
@@ -417,12 +444,31 @@ class SchematicBuilder:
                f'\t)')
         self._elements.append(sym)
 
+        # Auto-register fence and pins for known passive types
+        _auto_body = {
+            "Device:R": BODY_R, "Device:C": BODY_C, "Device:L": BODY_L,
+            "Device:LED": BODY_LED, "Device:D": BODY_D,
+        }
+        body = _auto_body.get(lib_id)
+        if body:
+            self.register_body(x, y, body[0], body[1], angle, ref)
+        pin_offsets = _PASSIVE_PINS.get(lib_id)
+        if pin_offsets:
+            for i, (dx, dy) in enumerate(pin_offsets):
+                # Rotate schematic offset by component angle
+                if angle == 90:    dx, dy = dy, -dx
+                elif angle == 180: dx, dy = -dx, -dy
+                elif angle == 270: dx, dy = -dy, dx
+                pnum = pin_nums[i] if i < len(pin_nums) else ""
+                self.register_pin(x + dx, y + dy, ref, pnum)
+
     def place_power(self, net_name, x, y, angle=0):
         """Place a power symbol with a wire stub from (x,y) to the symbol pin.
 
         (x,y) is the component pin tip. The stub direction depends on the net:
         - GND variants: stub goes DOWN (+y direction), symbol below
-        - VCC/+3V3/etc: stub goes UP (-y direction), symbol above
+        - Negative rails (-5V, -5VA, -6V, etc.): stub goes DOWN, arrow points down
+        - Positive rails (+3V3, +5V, +5VA, etc.): stub goes UP, symbol above
         - PWR_FLAG: placed directly at (x,y), no stub
         """
         x, y = snap(x), snap(y)
@@ -433,14 +479,21 @@ class SchematicBuilder:
         lib_id = f"power:{net_name}"
         if net_name == "PWR_FLAG":
             sx, sy = x, y
+            sym_angle = angle
         elif "GND" in net_name:
             sx, sy = x, snap(y + STUB)
+            sym_angle = angle
+        elif net_name.startswith("-"):
+            # Negative rails: stub DOWN (like GND), symbol rotated 180° so arrow points down
+            sx, sy = x, snap(y + STUB)
+            sym_angle = 180
         else:
             sx, sy = x, snap(y - STUB)
+            sym_angle = angle
 
         sym = (f'\t(symbol\n'
                f'\t\t(lib_id "{lib_id}")\n'
-               f'\t\t(at {sx} {sy} {angle})\n'
+               f'\t\t(at {sx} {sy} {sym_angle})\n'
                f'\t\t(unit 1)\n'
                f'\t\t(exclude_from_sim no)\n'
                f'\t\t(in_bom no)\n'
@@ -477,15 +530,20 @@ class SchematicBuilder:
         if net_name == "PWR_FLAG":
             self._elements.append(sym)
         else:
+            self._wires.append((x, y, sx, sy))
             self._elements.append(wire(x, y, sx, sy))
             self._elements.append(sym)
 
     def add_wire(self, x1, y1, x2, y2):
         """Add a wire between two points."""
+        x1, y1, x2, y2 = snap(x1), snap(y1), snap(x2), snap(y2)
+        self._wires.append((x1, y1, x2, y2))
         self._elements.append(wire(x1, y1, x2, y2))
 
     def add_junction(self, x, y):
         """Add a junction at the given position."""
+        x, y = snap(x), snap(y)
+        self._junctions.add((x, y))
         self._elements.append(junction(x, y))
 
     def add_no_connect(self, x, y):
@@ -494,15 +552,230 @@ class SchematicBuilder:
 
     def add_net_label(self, name, x, y, angle=0):
         """Add a net label with wire stub."""
+        x, y = snap(x), snap(y)
+        dx = -STUB if angle == 180 else STUB
+        lx = snap(x + dx)
+        self._wires.append((min(x, lx), y, max(x, lx), y))
         self._elements.append(net_label(name, x, y, angle))
 
     def add_global_label(self, name, x, y, angle, shape="input"):
         """Add a global label with wire stub."""
+        x, y = snap(x), snap(y)
+        dx = STUB if angle == 180 else -STUB
+        lx = snap(x + dx)
+        self._wires.append((min(x, lx), y, max(x, lx), y))
         self._elements.append(global_label(name, x, y, angle, shape))
 
     def add_hlabel(self, name, x, y, angle, shape="input"):
         """Add a hierarchical label with wire stub."""
+        x, y = snap(x), snap(y)
+        dx = -STUB if angle == 180 else STUB
+        lx = snap(x + dx)
+        self._wires.append((min(x, lx), y, max(x, lx), y))
+        self._hlabel_names[name].append((x, y))
         self._elements.append(hlabel(name, x, y, angle, shape))
+
+    def register_pin(self, x, y, ref="", pin=""):
+        """Register a component pin tip position for validation.
+
+        Call after place_sym() for each pin whose position you know.
+        The validator will check that registered pins land on wire endpoints,
+        not in the middle of wire segments.
+
+        Args:
+            x, y:  Pin tip position in schematic coordinates (mm)
+            ref:   Reference designator (e.g. "U1") for error messages
+            pin:   Pin number/name (e.g. "3") for error messages
+        """
+        self._pins.append((snap(x), snap(y), ref, pin))
+
+    def register_body(self, cx, cy, half_w, half_h, angle=0, ref=""):
+        """Register a component body rectangle for wire-through-body detection.
+
+        The body is defined by its center and half-dimensions in library
+        coordinates. The angle parameter rotates the rectangle (swaps w/h
+        for 90/270).
+
+        Use the BODY_* constants for common components:
+            sb.register_body(80, 60, *BODY_R, angle=0, ref="R1")
+
+        For ICs, estimate body as the area between pin columns, shrunk
+        inward by 2.54mm from pin tips:
+            sb.register_body(cx, cy, pin_x_max - 2.54, pin_y_max + 1.27,
+                             angle=0, ref="U1")
+
+        Args:
+            cx, cy:    Component center position (schematic coordinates)
+            half_w:    Half-width of body in library coords (x-axis)
+            half_h:    Half-height of body in library coords (y-axis)
+            angle:     Component rotation (0, 90, 180, 270)
+            ref:       Reference designator for error messages
+        """
+        cx, cy = snap(cx), snap(cy)
+        # Swap w/h for 90/270 rotation (body is axis-aligned in schematic)
+        if angle in (90, 270):
+            half_w, half_h = half_h, half_w
+        self._bodies.append((cx - half_w, cy - half_h,
+                             cx + half_w, cy + half_h, ref))
+
+    # -------------------------------------------------------------------
+    # Validation
+    # -------------------------------------------------------------------
+
+    def validate(self):
+        """Check for common wiring rule violations.
+
+        Returns a list of warning/error strings. Empty list = all checks pass.
+        Checks performed:
+          1. Diagonal wires (must be horizontal or vertical)
+          2. Overlapping collinear wires (KiCad merges them, losing endpoints)
+          3. Wire endpoints or registered pins that fall mid-segment
+          4. Duplicate hierarchical labels (same name used more than once)
+          5. Missing junctions (3+ wire endpoints meet without a junction)
+          6. Wires passing through registered component bodies
+        """
+        issues = []
+
+        # --- 1. Diagonal wires -------------------------------------------
+        for x1, y1, x2, y2 in self._wires:
+            if x1 != x2 and y1 != y2:
+                issues.append(
+                    f"ERROR: Diagonal wire from ({x1},{y1}) to ({x2},{y2}) "
+                    f"— all wires must be horizontal or vertical")
+
+        # --- 2. Overlapping collinear wires ------------------------------
+        # Group by axis: horizontal wires by y, vertical wires by x
+        h_by_y = defaultdict(list)  # y -> [(x_min, x_max)]
+        v_by_x = defaultdict(list)  # x -> [(y_min, y_max)]
+        for x1, y1, x2, y2 in self._wires:
+            if y1 == y2 and x1 != x2:  # horizontal
+                h_by_y[y1].append((min(x1, x2), max(x1, x2)))
+            elif x1 == x2 and y1 != y2:  # vertical
+                v_by_x[x1].append((min(y1, y2), max(y1, y2)))
+
+        for y, segs in h_by_y.items():
+            for i in range(len(segs)):
+                for j in range(i + 1, len(segs)):
+                    a1, a2 = segs[i]
+                    b1, b2 = segs[j]
+                    # overlap if ranges intersect (not just touch)
+                    if a1 < b2 and b1 < a2:
+                        overlap_start = max(a1, b1)
+                        overlap_end = min(a2, b2)
+                        if overlap_start < overlap_end:
+                            issues.append(
+                                f"WARNING: Overlapping horizontal wires at y={y}: "
+                                f"({a1},{y})-({a2},{y}) and ({b1},{y})-({b2},{y}) "
+                                f"overlap in x=[{overlap_start},{overlap_end}]")
+
+        for x, segs in v_by_x.items():
+            for i in range(len(segs)):
+                for j in range(i + 1, len(segs)):
+                    a1, a2 = segs[i]
+                    b1, b2 = segs[j]
+                    if a1 < b2 and b1 < a2:
+                        overlap_start = max(a1, b1)
+                        overlap_end = min(a2, b2)
+                        if overlap_start < overlap_end:
+                            issues.append(
+                                f"WARNING: Overlapping vertical wires at x={x}: "
+                                f"({x},{a1})-({x},{a2}) and ({x},{b1})-({x},{b2}) "
+                                f"overlap in y=[{overlap_start},{overlap_end}]")
+
+        # --- 3. Mid-wire points ------------------------------------------
+        # Collect all points that should land on wire ENDPOINTS, not mid-segment
+        check_points = []
+        # All wire endpoints are potential mid-wire victims of OTHER segments
+        for x1, y1, x2, y2 in self._wires:
+            check_points.append((x1, y1, "wire endpoint"))
+            check_points.append((x2, y2, "wire endpoint"))
+        # Registered component pins
+        for px, py, ref, pin in self._pins:
+            label = f"pin {ref}:{pin}" if ref else "registered pin"
+            check_points.append((px, py, label))
+
+        seen_midwire = set()
+        for px, py, label in check_points:
+            # Check against horizontal wires at same y
+            for a1, a2 in h_by_y.get(py, []):
+                if a1 < px < a2:  # strictly between endpoints
+                    key = (px, py, a1, py, a2, py)
+                    if key not in seen_midwire:
+                        seen_midwire.add(key)
+                        issues.append(
+                            f"WARNING: {label} at ({px},{py}) falls mid-wire "
+                            f"on horizontal segment ({a1},{py})-({a2},{py}) "
+                            f"— KiCad won't connect it; break wire into segments")
+            # Check against vertical wires at same x
+            for a1, a2 in v_by_x.get(px, []):
+                if a1 < py < a2:
+                    key = (px, py, px, a1, px, a2)
+                    if key not in seen_midwire:
+                        seen_midwire.add(key)
+                        issues.append(
+                            f"WARNING: {label} at ({px},{py}) falls mid-wire "
+                            f"on vertical segment ({px},{a1})-({px},{a2}) "
+                            f"— KiCad won't connect it; break wire into segments")
+
+        # --- 4. Duplicate hierarchical labels ----------------------------
+        for name, positions in self._hlabel_names.items():
+            if len(positions) > 1:
+                locs = ", ".join(f"({x},{y})" for x, y in positions)
+                issues.append(
+                    f"ERROR: Hierarchical label '{name}' used {len(positions)} "
+                    f"times on same sheet at {locs} "
+                    f"— use add_net_label() for additional connections")
+
+        # --- 5. Missing junctions ----------------------------------------
+        # Count wire endpoints at each point
+        endpoint_count = defaultdict(int)
+        for x1, y1, x2, y2 in self._wires:
+            endpoint_count[(x1, y1)] += 1
+            endpoint_count[(x2, y2)] += 1
+
+        for point, count in endpoint_count.items():
+            if count >= 3 and point not in self._junctions:
+                issues.append(
+                    f"WARNING: {count} wire endpoints meet at "
+                    f"({point[0]},{point[1]}) without a junction "
+                    f"— add sb.add_junction({point[0]}, {point[1]})")
+
+        # --- 6. Wires through component fence (body + pins + clearance) ---
+        # The fence is a keep-out zone around each component. Any wire
+        # inside the fence is OK only if it connects to a registered pin
+        # of that component.
+        pins_by_ref = defaultdict(set)
+        for px, py, ref, pin in self._pins:
+            pins_by_ref[ref].add((px, py))
+
+        seen_body_hits = set()
+        for x1, y1, x2, y2 in self._wires:
+            for bx1, by1, bx2, by2, ref in self._bodies:
+                hit = False
+                if y1 == y2:  # horizontal wire
+                    wy = y1
+                    wx1, wx2 = min(x1, x2), max(x1, x2)
+                    if by1 < wy < by2 and max(wx1, bx1) < min(wx2, bx2):
+                        hit = True
+                elif x1 == x2:  # vertical wire
+                    wx = x1
+                    wy1, wy2 = min(y1, y2), max(y1, y2)
+                    if bx1 < wx < bx2 and max(wy1, by1) < min(wy2, by2):
+                        hit = True
+                if hit:
+                    # Exempt wires that connect to a pin of this component
+                    comp_pins = pins_by_ref.get(ref, set())
+                    if (x1, y1) in comp_pins or (x2, y2) in comp_pins:
+                        continue
+                    key = (x1, y1, x2, y2, ref)
+                    if key not in seen_body_hits:
+                        seen_body_hits.add(key)
+                        issues.append(
+                            f"WARNING: Wire ({x1},{y1})-({x2},{y2}) passes "
+                            f"through fence of {ref} — route around the "
+                            f"component, not through it")
+
+        return issues
 
     def assemble(self):
         """Assemble the complete schematic as a string."""
@@ -554,10 +827,27 @@ class SchematicBuilder:
             f')'
         )
 
-    def write(self, filepath):
-        """Write the assembled schematic to a file."""
+    def write(self, filepath, validate=True):
+        """Write the assembled schematic to a file.
+
+        Args:
+            filepath:  Output .kicad_sch path
+            validate:  Run wiring validation before writing (default True).
+                       Issues are printed but do not block writing.
+        """
         content = self.assemble()
+        issues = self.validate() if validate else []
+        if issues:
+            errors = [i for i in issues if i.startswith("ERROR")]
+            warnings = [i for i in issues if i.startswith("WARNING")]
+            print(f"\n{'=' * 64}")
+            print(f"  VALIDATION: {len(errors)} error(s), {len(warnings)} warning(s)")
+            print(f"{'=' * 64}")
+            for issue in issues:
+                print(f"  {issue}")
+            print(f"{'=' * 64}\n")
         with open(filepath, "w") as f:
             f.write(content)
-        print(f"Written {len(content):6d} bytes -> {filepath}")
+        status = "CLEAN" if not issues else f"{len(issues)} issue(s)"
+        print(f"Written {len(content):6d} bytes -> {filepath}  [{status}]")
         return content
