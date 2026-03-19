@@ -712,43 +712,47 @@ class SchematicBuilder:
 
     def add_bus_tap(self, label_name, bus_x, tap_y, label_side="left",
                     label_shape="bidirectional"):
-        """Add a complete bus tap: bus entry + net label + short wire.
+        """Add a complete bus tap: bus entry + net label.
 
-        Creates a diagonal bus entry at the bus, a horizontal wire, and a
-        net label for the individual signal. Signals are typically arranged
-        vertically along the bus with lowest number on top.
+        The bus entry diagonal connects the bus wire to the net label's
+        stub wire. The net label stub IS the signal wire — no extra wire
+        needed between entry and label.
+
+        KiCad bus_entry format: (at X Y) is the signal-wire end,
+        (at+size) is the bus-wire end. The signal-wire end must touch
+        a wire or label stub. The bus-wire end must touch a bus wire.
 
         Args:
             label_name:  Net label name (e.g., "ELEC_1")
-            bus_x:       X position of the bus (vertical bus line)
-            tap_y:       Y position of this tap on the bus
-            label_side:  "left" (label extends left, entry goes left-to-bus)
-                         or "right" (label extends right)
-            label_shape: hlabel shape if using hlabel (not used for net labels)
+            bus_x:       X position of the vertical bus wire
+            tap_y:       Y position where this tap meets the bus
+            label_side:  "left" or "right"
         """
         bus_x = snap(bus_x)
         tap_y = snap(tap_y)
 
         if label_side == "left":
-            # Bus entry: from (bus_x - 2.54, tap_y - 2.54) to (bus_x, tap_y)
-            entry_x = snap(bus_x - 2.54)
-            entry_y = snap(tap_y - 2.54)
-            self.add_bus_entry(entry_x, entry_y, 2.54, 2.54)
-            # Wire from entry start going left
-            wire_x = snap(entry_x - 5.08)
-            self.add_wire(wire_x, entry_y, entry_x, entry_y)
-            # Net label at wire left end
-            self.add_net_label(label_name, wire_x, entry_y, 180)
+            # Bus entry: (at) on the bus, (size) pointing to signal wire
+            # Bus point: (bus_x, tap_y)
+            # Signal point: (bus_x - 2.54, tap_y - 2.54)
+            sig_x = snap(bus_x - 2.54)
+            sig_y = snap(tap_y - 2.54)
+            self.add_bus_entry(bus_x, tap_y, -2.54, -2.54)
+            # Wire from signal point going left to label
+            wire_end_x = snap(sig_x - 2.54)
+            self.add_wire(wire_end_x, sig_y, sig_x, sig_y)
+            self.add_net_label(label_name, wire_end_x, sig_y, 180)
         else:
-            # Bus entry: from (bus_x + 2.54, tap_y - 2.54) to (bus_x, tap_y)
-            entry_x = snap(bus_x + 2.54)
-            entry_y = snap(tap_y - 2.54)
-            self.add_bus_entry(entry_x, entry_y, -2.54, 2.54)
-            # Wire from entry start going right
-            wire_x = snap(entry_x + 5.08)
-            self.add_wire(entry_x, entry_y, wire_x, entry_y)
-            # Net label at wire right end
-            self.add_net_label(label_name, wire_x, entry_y, 0)
+            # Bus entry: (at) on the bus, (size) pointing to signal wire
+            # Bus point: (bus_x, tap_y)
+            # Signal point: (bus_x + 2.54, tap_y - 2.54)
+            sig_x = snap(bus_x + 2.54)
+            sig_y = snap(tap_y - 2.54)
+            self.add_bus_entry(bus_x, tap_y, 2.54, -2.54)
+            # Wire from signal point going right to label
+            wire_end_x = snap(sig_x + 2.54)
+            self.add_wire(sig_x, sig_y, wire_end_x, sig_y)
+            self.add_net_label(label_name, wire_end_x, sig_y, 0)
 
     def add_junction(self, x, y):
         """Add a junction at the given position."""

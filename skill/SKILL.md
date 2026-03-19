@@ -602,6 +602,17 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 5. Run ERC: `kicad-cli sch erc --exit-code-violations`
 6. Export SVG for visual check
 
+### All Validation Must Pass — Blocking Gate
+- **All validators must pass before proceeding to the next workflow phase.**
+- This includes:
+  1. **SchematicBuilder `sb.write()` → `[CLEAN]`** for every generator script
+  2. **Net validation `sb.check_nets()` → PASS** for sheets with declared nets
+  3. **KiCad ERC → 0 errors** across the full project
+- ERC warnings that are understood and documented (e.g., cosmetic bus entry geometry, easyeda2kicad footprint paths) may be accepted but must be listed in `07-schematics.md`.
+- ERC errors (shorts, unconnected pins, hierarchy mismatches) are **blockers** — they must be fixed before any further work.
+- If an error cannot be fixed, escalate to the user. **Never suppress errors** to proceed.
+- **Final validation pass**: As the last step before generating phase reports and moving to the next phase, re-run ALL generators and full-project ERC to catch any regressions. Document the results in `07-schematics.md`.
+
 ### Keeping the report file current
 
 `workflow/07-schematics.md` must be updated after every significant schematic change:
@@ -648,6 +659,26 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 - Common interface buses even with only 2 signals (e.g., I2C) should use bus notation — it's standard practice and improves readability
 - Internal signal groups within a single sheet (e.g., FMC data/address) should also use bus routing for readability
 - **Bus aliases for named groups**: When bus members don't follow a numbered pattern (e.g., SPI_MOSI/MISO/CLK/CS), define a bus alias with `sb.add_bus_alias("SPI", ["SPI_MOSI", "SPI_MISO", "SPI_CLK", "SPI_CS_ADC"])` and use `{SPI}` as the bus name instead of the verbose `{SPI_MOSI,SPI_MISO,SPI_CLK,SPI_CS_ADC}`. **Never** put long comma-separated member lists in hlabels — always use aliases for named buses.
+
+### All Coordinates Must Be Snapped — Including Raw S-Expressions
+- Any code that generates raw KiCad s-expressions (not through SchematicBuilder) must snap ALL coordinates with `snap()`.
+- This includes `gen_top_level.py` which builds sheet frames, wires, and global labels directly.
+- Floating point arithmetic (e.g., `x + 7.62`) can produce values like `111.75999999999999` instead of `111.76`. KiCad treats these as different points — wires won't connect.
+- Always: `snap(x + 7.62)` not `x + 7.62`.
+
+### Every Sheet Pin Must Have a Wire
+- KiCad requires a physical wire touching each hierarchical sheet pin — name-based connection alone is not enough.
+- For every sheet pin: draw a wire from the pin to a net label (or hlabel) with the matching signal name.
+- When using buses: the bus taps create net labels on the bus side, AND each sheet pin needs its own wire + net label on the sheet box side. Both labels share the same name, connecting by name.
+- Pattern: `bus_tap("ELEC_1") ←name→ net_label("ELEC_1") ←wire→ sheet_pin("ELEC_1")`
+- Missing wires cause `pin_not_connected` and `label_dangling` ERC errors.
+
+### Use Hierarchical Sub-Sheets for Repeated Circuits
+- When a design has multiple identical sub-circuits (e.g., 8 AFE channels, multiple buck converters with the same topology), implement them as a single sub-sheet file instantiated multiple times.
+- Each instance gets unique reference designators via KiCad's multi-instance mechanism (multiple `(path ...)` entries per component).
+- Benefits: one circuit to maintain, guaranteed consistency across instances, smaller schematic files, easier review.
+- The sub-sheet uses generic signal names (ELEC_1, ELEC_2) and the parent page maps them to instance-specific nets.
+- Use `add_multi_instance()` post-processing to add instance paths, or generate separate files from the same template function if multi-instance is too complex.
 
 ### No Redundant Labels — Keep Schematics Clean
 - If an hlabel connects directly to a component pin (via its stub wire or a short wire), do **not** add a duplicate `add_net_label()` for that same net on the same page unless it is needed elsewhere on the sheet.
