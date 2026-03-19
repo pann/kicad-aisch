@@ -55,5 +55,5 @@ The scripts were originally developed using proven KiCad schematic generators fr
 - `kicad-cli` — KiCad command-line interface (ERC, DRC, export SVG/PDF)
 - `easyeda2kicad` — LCSC/EasyEDA component import into KiCad format
 - `python3` — Script execution
-- `fpdf` Python package — PDF generation (latin-1 only, must sanitize Unicode)
+- `fpdf2` Python package — PDF generation (uses DejaVu TTF fonts for full Unicode support)
 - `inkscape` — SVG-to-PNG conversion (visual verification)

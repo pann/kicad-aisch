@@ -26,7 +26,7 @@ This skill works best with these companion skills installed:
 - `kicad-cli` — KiCad command-line interface (ERC, SVG/PDF export)
 - `easyeda2kicad` — LCSC/EasyEDA component import into KiCad format
 - `python3` — Script execution
-- `fpdf` Python package — PDF generation for workflow documents (`pip install fpdf`)
+- `fpdf2` Python package — PDF generation for workflow documents (`pip install fpdf2`)
 - `inkscape` (optional) — SVG-to-PNG conversion for visual verification
 
 ## Workflow Overview

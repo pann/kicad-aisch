@@ -38,7 +38,7 @@ Install the required tools, then copy the skill into Claude Code's skill directo
 
 ```bash
 # Install prerequisites
-pip install easyeda2kicad fpdf
+pip install easyeda2kicad fpdf2
 # KiCad 9: https://www.kicad.org/download/
 
 # Install the skill (personal — available in all projects)

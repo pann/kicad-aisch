@@ -393,6 +393,7 @@ class SchematicBuilder:
         self._wires = []            # [(x1, y1, x2, y2), ...] all wire segments
         self._junctions = set()     # {(x, y), ...}
         self._hlabel_names = defaultdict(list)  # name -> [(x, y), ...]
+        self._net_label_positions = defaultdict(list)  # name -> [(x, y), ...]
         self._pins = []             # [(x, y, ref, pin_num), ...] registered pins
         self._bodies = []           # [(x1, y1, x2, y2, ref), ...] component body rects
         self._power_stubs = []      # [(cx, cy, sx, sy, net), ...] power stub endpoints
@@ -772,6 +773,7 @@ class SchematicBuilder:
         dx = -STUB if angle == 180 else STUB
         lx = snap(x + dx)
         self._wires.append((min(x, lx), y, max(x, lx), y))
+        self._net_label_positions[name].append((x, y))
         self._elements.append(net_label(name, x, y, angle))
 
     def add_global_label(self, name, x, y, angle, shape="input"):
@@ -1050,6 +1052,24 @@ class SchematicBuilder:
                         f"WARNING: Symbol {sref} at ({sx},{sy}) is placed "
                         f"inside fence of {bref} — move it outside the "
                         f"component area")
+
+        # --- 9. Nearby same-name net labels (prefer wire) ----------------
+        MAX_LABEL_WIRE_DIST = 50.0  # mm — Manhattan distance threshold
+        for name, positions in self._net_label_positions.items():
+            if len(positions) < 2:
+                continue
+            for i in range(len(positions)):
+                for j in range(i + 1, len(positions)):
+                    x1, y1 = positions[i]
+                    x2, y2 = positions[j]
+                    dist = abs(x2 - x1) + abs(y2 - y1)
+                    if dist <= MAX_LABEL_WIRE_DIST:
+                        issues.append(
+                            f"WARNING: Net labels \"{name}\" at "
+                            f"({x1},{y1}) and ({x2},{y2}) are "
+                            f"{dist:.1f}mm apart (Manhattan) — "
+                            f"prefer a direct wire over net labels "
+                            f"for nearby connections")
 
         return issues
 

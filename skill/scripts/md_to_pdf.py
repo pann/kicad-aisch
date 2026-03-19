@@ -22,41 +22,44 @@ from pathlib import Path
 # PDF subclass
 # ---------------------------------------------------------------------------
 
+FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+
+# Font family names used throughout (mapped to DejaVu TTF in _register_fonts)
+FONT_SANS = "DejaVuSans"
+FONT_MONO = "DejaVuSansMono"
+
+
+def _register_fonts(pdf: FPDF):
+    """Register Unicode TTF fonts with fpdf2."""
+    pdf.add_font(FONT_SANS, "", f"{FONT_DIR}/DejaVuSans.ttf")
+    pdf.add_font(FONT_SANS, "B", f"{FONT_DIR}/DejaVuSans-Bold.ttf")
+    pdf.add_font(FONT_SANS, "I", f"{FONT_DIR}/DejaVuSans-Oblique.ttf")
+    pdf.add_font(FONT_SANS, "BI", f"{FONT_DIR}/DejaVuSans-BoldOblique.ttf")
+    pdf.add_font(FONT_MONO, "", f"{FONT_DIR}/DejaVuSansMono.ttf")
+    pdf.add_font(FONT_MONO, "B", f"{FONT_DIR}/DejaVuSansMono-Bold.ttf")
+
+
 class MarkdownPDF(FPDF):
     def __init__(self, header_text="", *args, **kwargs):
         super().__init__(*args, **kwargs)
+        _register_fonts(self)
         self._header_text = header_text
 
     def header(self):
         if self._header_text:
-            self.set_font("Helvetica", "I", 8)
-            self.cell(0, 5, sanitize_latin1(self._header_text), align="R")
+            self.set_font(FONT_SANS, "I", 8)
+            self.cell(0, 5, self._header_text, align="R")
             self.ln(8)
 
     def footer(self):
         self.set_y(-15)
-        self.set_font("Helvetica", "I", 8)
+        self.set_font(FONT_SANS, "I", 8)
         self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", align="C")
 
 
 # ---------------------------------------------------------------------------
 # Text helpers
 # ---------------------------------------------------------------------------
-
-def sanitize_latin1(text: str) -> str:
-    """Replace Unicode chars that don't fit in latin-1."""
-    replacements = {
-        "\u2014": "-", "\u2013": "-",       # em/en dash
-        "\u2019": "'", "\u2018": "'",        # single quotes
-        "\u201c": '"', "\u201d": '"',        # double quotes
-        "\u2026": "...",                       # ellipsis
-        "\u2022": "-",                         # bullet
-        "\u00a0": " ",                         # non-breaking space
-    }
-    for orig, repl in replacements.items():
-        text = text.replace(orig, repl)
-    return text.encode("latin-1", errors="replace").decode("latin-1")
-
 
 def clean_md_inline(text: str) -> str:
     """Remove markdown inline formatting for plain text output."""
@@ -68,7 +71,7 @@ def clean_md_inline(text: str) -> str:
 
 def write_rich_text(pdf: FPDF, text: str, w: float = 0):
     """Write text with markdown cleaned, using multi_cell for wrapping."""
-    clean = sanitize_latin1(clean_md_inline(text))
+    clean = clean_md_inline(text)
     if w <= 0:
         w = pdf.w - pdf.l_margin - pdf.r_margin
     pdf.multi_cell(w, 5, clean)
@@ -115,11 +118,11 @@ def render_table(pdf: MarkdownPDF, table_lines: list[str]):
 
     for row in rows:
         for i in range(len(row)):
-            row[i] = sanitize_latin1(clean_md_inline(row[i]))
+            row[i] = (clean_md_inline(row[i]))
 
     table_w = pdf.w - pdf.l_margin - pdf.r_margin
     font_size = 7
-    pdf.set_font("Helvetica", "", font_size)
+    pdf.set_font(FONT_SANS, "", font_size)
 
     max_widths = [0.0] * num_cols
     for row in rows:
@@ -137,7 +140,7 @@ def render_table(pdf: MarkdownPDF, table_lines: list[str]):
     line_h = font_size * 0.5
 
     def render_row(row: list[str], bold: bool = False):
-        pdf.set_font("Helvetica", "B" if bold else "", font_size)
+        pdf.set_font(FONT_SANS, "B" if bold else "", font_size)
         max_lines = 1
         for i, cell in enumerate(row):
             cw = col_widths[i] - 2
@@ -158,7 +161,7 @@ def render_table(pdf: MarkdownPDF, table_lines: list[str]):
             x = x_start + sum(col_widths[:i])
             pdf.rect(x, y_start, col_widths[i], row_h)
             pdf.set_xy(x + 1, y_start + 1)
-            pdf.set_font("Helvetica", "B" if bold else "", font_size)
+            pdf.set_font(FONT_SANS, "B" if bold else "", font_size)
             pdf.multi_cell(col_widths[i] - 2, line_h, cell)
 
         pdf.set_y(y_start + row_h)
@@ -245,8 +248,8 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
             style = m.group(7) or "solid"
 
             # Auto-size if not specified
-            pdf.set_font("Helvetica", "", 7)
-            text_w = pdf.get_string_width(sanitize_latin1(label))
+            pdf.set_font(FONT_SANS, "", 7)
+            text_w = pdf.get_string_width(label)
             if bw is None:
                 bw = max(text_w + 6, 20)
             if bh is None:
@@ -330,10 +333,10 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
         pdf.set_fill_color(r, gr, b)
         pdf.set_draw_color(180, 180, 180)
         pdf.rect(g["x"], g["y"], g["w"], g["h"], style="DF")
-        pdf.set_font("Helvetica", "B", 8)
+        pdf.set_font(FONT_SANS, "B", 8)
         pdf.set_text_color(100, 100, 100)
         pdf.set_xy(g["x"] + 2, g["y"] + 1)
-        pdf.cell(g["w"] - 4, 4, sanitize_latin1(g["label"]))
+        pdf.cell(g["w"] - 4, 4, g["label"])
         pdf.set_text_color(0, 0, 0)
         pdf.set_draw_color(0, 0, 0)
 
@@ -344,11 +347,11 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
         else:
             pdf.line(vl["x"], vl["y1"], vl["x"], vl["y2"])
         if vl["label"]:
-            pdf.set_font("Helvetica", "I", 7)
+            pdf.set_font(FONT_SANS, "I", 7)
             pdf.set_text_color(100, 100, 100)
-            lw = pdf.get_string_width(sanitize_latin1(vl["label"]))
+            lw = pdf.get_string_width(vl["label"])
             pdf.set_xy(vl["x"] - lw / 2, vl["y1"] - 4)
-            pdf.cell(lw, 3, sanitize_latin1(vl["label"]))
+            pdf.cell(lw, 3, vl["label"])
             pdf.set_text_color(0, 0, 0)
 
     # --- Draw hlines ---
@@ -366,8 +369,8 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
         else:
             pdf.set_fill_color(255, 255, 255)
             pdf.rect(b["x"], b["y"], b["w"], b["h"], style="DF")
-        pdf.set_font("Helvetica", "", 7)
-        text = sanitize_latin1(b["label"])
+        pdf.set_font(FONT_SANS, "", 7)
+        text = b["label"]
         tw = pdf.get_string_width(text)
         # Center text in box
         tx = b["cx"] - tw / 2
@@ -382,8 +385,8 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
             style_str += "B"
         if lb["italic"]:
             style_str += "I"
-        pdf.set_font("Helvetica", style_str, lb["size"])
-        text = sanitize_latin1(lb["text"])
+        pdf.set_font(FONT_SANS, style_str, lb["size"])
+        text = lb["text"]
         tw = pdf.get_string_width(text)
         if lb["align"] == "center":
             pdf.set_xy(lb["x"] - tw / 2, lb["y"])
@@ -419,8 +422,8 @@ def render_diagram(pdf: MarkdownPDF, diagram_lines: list[str]):
 
         # Draw label at midpoint
         if a["label"]:
-            pdf.set_font("Helvetica", "", 6)
-            text = sanitize_latin1(a["label"])
+            pdf.set_font(FONT_SANS, "", 6)
+            text = a["label"]
             tw = pdf.get_string_width(text)
             mx = (x1 + x2) / 2
             my = (y1 + y2) / 2
@@ -511,7 +514,7 @@ def _draw_dashed_rect(pdf, x, y, w, h):
 
 def render_code_block(pdf: MarkdownPDF, code_lines: list[str]):
     """Render a code block with monospace font in a gray box."""
-    pdf.set_font("Courier", "", 7)
+    pdf.set_font(FONT_MONO, "", 7)
     line_h = 3.5
     padding = 3
 
@@ -534,7 +537,7 @@ def render_code_block(pdf: MarkdownPDF, code_lines: list[str]):
     pdf.set_text_color(30, 30, 30)
     for i, code_line in enumerate(code_lines):
         pdf.set_xy(x + padding, y + padding + i * line_h)
-        text = sanitize_latin1(code_line.rstrip())
+        text = code_line.rstrip()
         pdf.cell(w - 2 * padding, line_h, text)
 
     pdf.set_text_color(0, 0, 0)
@@ -607,8 +610,8 @@ def render_md_to_pdf(md_text: str, pdf: MarkdownPDF):
             text = stripped.lstrip("#").strip()
             sizes = {1: 18, 2: 15, 3: 13, 4: 11}
             size = sizes.get(level, 10)
-            pdf.set_font("Helvetica", "B", size)
-            pdf.multi_cell(0, size * 0.6, sanitize_latin1(clean_md_inline(text)))
+            pdf.set_font(FONT_SANS, "B", size)
+            pdf.multi_cell(0, size * 0.6, clean_md_inline(text))
             pdf.ln(2)
             i += 1
             continue
@@ -617,7 +620,7 @@ def render_md_to_pdf(md_text: str, pdf: MarkdownPDF):
         if stripped.startswith("- ") or stripped.startswith("* "):
             text = stripped[2:]
             indent = (len(line) - len(line.lstrip())) // 2
-            pdf.set_font("Helvetica", "", 10)
+            pdf.set_font(FONT_SANS, "", 10)
             x_offset = pdf.l_margin + indent * 6
             pdf.set_x(x_offset)
             pdf.cell(4, 5, "-")
@@ -631,7 +634,7 @@ def render_md_to_pdf(md_text: str, pdf: MarkdownPDF):
         m = re.match(r"^(\d+)\.\s+(.*)", stripped)
         if m:
             num, text = m.group(1), m.group(2)
-            pdf.set_font("Helvetica", "", 10)
+            pdf.set_font(FONT_SANS, "", 10)
             pdf.cell(8, 5, f"{num}.")
             write_rich_text(pdf, text, w=pdf.w - pdf.r_margin - pdf.get_x())
             pdf.ln(1)
@@ -639,7 +642,7 @@ def render_md_to_pdf(md_text: str, pdf: MarkdownPDF):
             continue
 
         # --- Regular paragraph ---
-        pdf.set_font("Helvetica", "", 10)
+        pdf.set_font(FONT_SANS, "", 10)
         write_rich_text(pdf, stripped, w=pdf.w - pdf.l_margin - pdf.r_margin)
         pdf.ln(1)
         i += 1
@@ -665,15 +668,15 @@ def generate_pdf(src: Path, out: Path, title: str = "", subtitle: str = "",
     pdf.add_page()
 
     if title:
-        pdf.set_font("Helvetica", "B", 20)
-        pdf.cell(0, 12, sanitize_latin1(title), align="C")
+        pdf.set_font(FONT_SANS, "B", 20)
+        pdf.cell(0, 12, title, align="C")
         pdf.ln(8)
     if subtitle:
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 6, sanitize_latin1(subtitle), align="C")
+        pdf.set_font(FONT_SANS, "", 11)
+        pdf.cell(0, 6, subtitle, align="C")
         pdf.ln(4)
     if date_str:
-        pdf.set_font("Helvetica", "I", 9)
+        pdf.set_font(FONT_SANS, "I", 9)
         pdf.cell(0, 6, date_str, align="C")
         pdf.ln(12)
     elif title:

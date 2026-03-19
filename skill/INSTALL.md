@@ -7,7 +7,7 @@
 # Install from https://www.kicad.org/download/
 
 # Python packages
-pip install easyeda2kicad fpdf
+pip install easyeda2kicad fpdf2
 
 # Optional: for SVG-to-PNG visual verification
 sudo apt install inkscape
