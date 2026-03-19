@@ -326,6 +326,9 @@ errors = sb.check_nets("/path/to/root.kicad_sch")
 ## Coordinate Conventions
 
 - **All coordinates in mm**, snapped to 1.27mm grid via `snap()`
+- **Hierarchical sheet boxes are fenced** — register each sheet box as a body so wires cannot route through it. Use `sb.register_body(cx, cy, w/2, h/2, ref="SheetName")` after placing a sheet box.
+- **Reduce sheet box size** — sheet boxes should be as compact as possible (just enough for pin labels). Large boxes waste space and make routing harder.
+- **Sheet pin justify** — left-side pins use `(justify left)`, right-side pins use `(justify right)` to keep labels inside the box.
 - **Hierarchical sheet boxes and their pins must also be snapped** — SchematicBuilder auto-snaps wires/labels, but raw s-expression sheet entries (position, size, pin coordinates) must be manually snapped with `snap()`. If sheet pin positions are off-grid, wires from SchematicBuilder won't connect to them and KiCad ERC will report `hier_label_mismatch` and `unconnected_wire_endpoint` errors.
 - **STUB = 7.62mm** — wire stub length for all labels and power symbols
 - **Symbol libraries use Y-up; schematics use Y-down**
