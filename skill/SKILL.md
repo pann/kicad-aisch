@@ -262,8 +262,12 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
   - Positive rails (`+3V3`, `+5V`, `+5VA`, etc.): symbol at `y - 7.62` (above), stub wire up, arrow points up
   - PWR_FLAG: placed directly at (x, y), no stub
 
-### Wiring and Labels
+### Wiring, Buses, and Labels
 - `sb.add_wire(x1, y1, x2, y2)` — Wire between two points
+- `sb.add_bus_alias(name, members)` — Define a bus alias (e.g., `"SPI"` → `["SPI_MOSI",...]`). Use `{SPI}` in labels.
+- `sb.add_bus(x1, y1, x2, y2)` — Bus wire (thick line for signal groups)
+- `sb.add_bus_entry(x, y, dx, dy)` — Diagonal bus entry connecting wire to bus
+- `sb.add_bus_tap(name, bus_x, tap_y, side, shape)` — Complete bus tap: entry + wire + label
 - `sb.add_junction(x, y)` — Junction at multi-wire crossing
 - `sb.add_no_connect(x, y)` — No-connect marker for unused pins
 - `sb.add_net_label(name, x, y, angle=0)` — Local net label with STUB wire
@@ -282,17 +286,36 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
 - `BODY_LED = (5.08, 2.54)` — Device:LED fence (horizontal pins + clearance)
 - `BODY_D = (5.08, 2.54)` — Device:D fence (same as LED)
 
-**Auto-registration**: `place_sym("Device:R", ...)` automatically registers both the fence AND the pin positions. No manual `register_body()` or `register_pin()` calls needed for standard passives.
+**Auto-registration**: ALL `place_sym()` calls automatically register both the fence AND the pin positions:
+- **Known passives** (R, C, L, LED, D): use predefined fence constants
+- **All other components** (ICs, connectors, relays, etc.): fence is computed from the symbol's actual pin positions plus 2.54mm clearance on each side. Pin positions are parsed from the embedded lib_symbols.
+
+No manual `register_body()` or `register_pin()` calls needed — all components are fenced automatically.
+
+**Power symbols** are also fenced: `place_power()` registers a 3.81mm fence around each GND/VCC symbol graphic. The stub wire is exempted via pin registration. This prevents other wires from crossing through power symbol graphics.
 
 **Pin exemption**: Wires connecting to a registered pin of the component are allowed inside the fence. Only non-connecting wires are flagged.
 
-For ICs, manually register the fence:
+Manual `register_body()` can still be used to override or add custom fences if needed.
+
+### Net Declaration (post-generation validation)
+- `sb.declare_net(name, pins)` — Declare intended connectivity: all listed `(ref, pin)` tuples must be on the same net
+- `sb.check_nets(root_sch_path)` — Export netlist via kicad-cli and compare against declarations
+
+Catches shorts and open circuits that geometric validation cannot detect:
 ```python
-sb.register_body(cx, cy, max_pin_x - 2.54, max_pin_y + 1.27, angle=0, ref="U1")
+sb.declare_net("VREF", [("U202", "5"), ("R205", "2")])
+sb.declare_net("FB",   [("U202", "6"), ("R205", "1"), ("R204", "1")])
+sb.declare_net("VOUT", [("R204", "2"), ("L202", "2")])
+
+sb.write("output.kicad_sch")
+errors = sb.check_nets("/path/to/root.kicad_sch")
+# Reports: SHORT if VREF and FB end up on the same net
+#          OPEN if R205:1 and R204:1 are on different nets
 ```
 
 ### Validation
-- `sb.validate()` — Run all wiring checks, return list of issue strings (empty = clean)
+- `sb.validate()` — Run geometric wiring checks, return list of issue strings (empty = clean)
 
 ### Output
 - `sb.assemble()` — Return complete schematic as string
@@ -545,6 +568,8 @@ sb.add_wire(mid_x, 111.76, 121.92, 111.76)
 | Mid-wire points | WARNING | Wire endpoints or registered pins falling inside another segment |
 | Missing junctions | WARNING | 3+ wire endpoints meeting without a junction marker |
 | Wire through fence | WARNING | Wire inside component keep-out zone without connecting to a pin |
+| Power stub isolation | ERROR | Power symbol's far endpoint touches another wire — accidental short |
+| Symbol inside fence | WARNING | A symbol (component or power) placed inside another component's fence |
 
 ### Using `register_pin()` for pin validation
 
@@ -574,6 +599,22 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 5. Run ERC: `kicad-cli sch erc --exit-code-violations`
 6. Export SVG for visual check
 
+### Keeping the report file current
+
+`workflow/07-schematics.md` must be updated after every significant schematic change:
+- Update the generator table, file sizes, hierarchy structure
+- Update ERC status (current violation count and breakdown)
+- Add notes about symbol pin remapping candidates
+- Add notes about pending readability improvements
+- Do NOT regenerate the PDF until moving to the next workflow phase — the markdown is the working document
+
+### Readability requirements
+
+1. **Descriptive text annotations** — add `(text "..." ...)` near each functional block explaining its purpose (e.g., "Buck converter: 12V → 5V digital")
+2. **Frame boxes** — use dashed rectangles around functional groups on complex sheets (power supply sections, relay blocks, etc.)
+3. **Signal name labels on key wires** — for critical internal signals (feedback nodes, sense outputs), add a net label even if the wire connects directly. This documents intent, not connectivity.
+4. **Symbol pin remap notes** — when a component symbol would benefit from pin rearrangement (like TPS562201 was remapped), note it in `07-schematics.md` under "Symbol Improvement Candidates". Do NOT edit symbols unless told to.
+
 ---
 
 ## Schematic Design Rules
@@ -594,6 +635,17 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 - For additional connections to the same net, use `add_net_label()` with the same name
 - This causes `same_local_global_label` ERC warnings — suppress in project settings (see below)
 
+### Use Buses for Signal Groups (3+ signals, or common interfaces)
+- When a sheet has a group of related signals, use a KiCad bus to collect them
+- Apply to: numbered groups (ELEC_1..16), protocol buses (SPI, I2C), control groups (MUX address)
+- Bus naming: `ELEC_[1..16]`, `SPI[0..3]`, `I2C[0..1]` — matches KiCad bus syntax
+- Individual signals connect to the bus via bus entries (diagonal stubs)
+- Signals must be ordered: lowest number on top, cascading down
+- Apply to both hierarchical sheet pins (parent page) and hlabels inside sub-sheets
+- Common interface buses even with only 2 signals (e.g., I2C) should use bus notation — it's standard practice and improves readability
+- Internal signal groups within a single sheet (e.g., FMC data/address) should also use bus routing for readability
+- **Bus aliases for named groups**: When bus members don't follow a numbered pattern (e.g., SPI_MOSI/MISO/CLK/CS), define a bus alias with `sb.add_bus_alias("SPI", ["SPI_MOSI", "SPI_MISO", "SPI_CLK", "SPI_CS_ADC"])` and use `{SPI}` as the bus name instead of the verbose `{SPI_MOSI,SPI_MISO,SPI_CLK,SPI_CS_ADC}`. **Never** put long comma-separated member lists in hlabels — always use aliases for named buses.
+
 ### No Redundant Labels — Keep Schematics Clean
 - If an hlabel connects directly to a component pin (via its stub wire or a short wire), do **not** add a duplicate `add_net_label()` for that same net on the same page unless it is needed elsewhere on the sheet.
 - Only add a net label when the signal must fan out to multiple locations on the same page.
@@ -603,6 +655,13 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 - Never modify `.kicad_sym` files
 - easyeda2kicad imports produce "unspecified" pin types — this is a known limitation, not a bug
 - Handle via ERC configuration, not by editing symbols
+
+### LED Current Limiting Resistors — Always Calculate
+- **Never use a generic resistor value** for LEDs. Always calculate: `R = (Vsupply - Vf) / Iled`
+- Typical values: Vf ≈ 2.0V (green/yellow), Vf ≈ 3.0V (blue/white), Iled ≈ 2mA for indicators
+- For positive rails: `+Rail → R → LED(A→K) → GND`. Use LED angle=180 for left-to-right current flow.
+- For negative rails: `GND → R → LED(A→K) → -Rail`. Current flows from GND (higher potential) through LED to the negative rail. Same LED angle=180.
+- **Check polarity**: LED at angle=0 has K(cathode) at left, A(anode) at right — current flows right-to-left. Use angle=180 to flip for left-to-right flow.
 
 ### PCB Pads Need Schematic Symbols
 - Every PCB solder pad needs a schematic symbol
@@ -634,15 +693,17 @@ Add this `erc` section at the **JSON root level** of `.kicad_pro` (NOT inside `"
   "rule_severities": {
     "pin_to_pin": "ignore",
     "same_local_global_label": "ignore",
-    "pin_not_driven": "warning"
+    "pin_not_driven": "warning",
+    "multiple_net_names": "error"
   }
 }
 ```
 
-**Why each suppression:**
+**Why each rule:**
 - `pin_to_pin: ignore` — easyeda2kicad "unspecified" pins trigger false positives
 - `same_local_global_label: ignore` — deliberate pattern from one-hlabel-per-net rule
 - `pin_not_driven: warning` — easyeda2kicad GPIO pins are "unspecified", don't satisfy KiCad's "driven" check for input pins
+- `multiple_net_names: error` — catches accidental shorts where two different net names are connected together. This must be treated as an error, not a warning.
 
 **Expected acceptable warnings after clean ERC:**
 - `lib_symbol_mismatch` — embedded symbols differ from installed KiCad library versions (cosmetic)
