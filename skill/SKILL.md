@@ -602,16 +602,53 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 5. Run ERC: `kicad-cli sch erc --exit-code-violations`
 6. Export SVG for visual check
 
-### All Validation Must Pass — Blocking Gate
-- **All validators must pass before proceeding to the next workflow phase.**
-- This includes:
-  1. **SchematicBuilder `sb.write()` → `[CLEAN]`** for every generator script
-  2. **Net validation `sb.check_nets()` → PASS** for sheets with declared nets
-  3. **KiCad ERC → 0 errors** across the full project
-- ERC warnings that are understood and documented (e.g., cosmetic bus entry geometry, easyeda2kicad footprint paths) may be accepted but must be listed in `07-schematics.md`.
-- ERC errors (shorts, unconnected pins, hierarchy mismatches) are **blockers** — they must be fixed before any further work.
+### Validation Is Mandatory After Every Change
+- **Every time a generator script is modified, ALL THREE validation levels must run before reporting the change as complete.** This is not optional — never skip validation, even for "small" changes.
+
+**Level 1: Generator validation (per-sheet)**
+After modifying any `gen_*.py` file, immediately run it:
+```bash
+python3 gen_<block>.py
+```
+Must print `[CLEAN]`. If it doesn't, fix all issues before proceeding.
+
+**Level 2: Net validation (per-sheet, if declared)**
+If the generator has `declare_net()` calls, verify `check_nets()` prints `PASS`.
+
+**Level 3: Full-project ERC**
+After ANY generator change, run full-project ERC:
+```bash
+kicad-cli sch erc --exit-code-violations <root>.kicad_sch
+```
+Check for `multiple_net_names` (shorts) and `hier_label_mismatch` (hierarchy errors). These are **blockers**.
+
+**Iterative workflow:**
+The schematic phase is iterative — changes trigger re-validation, which may reveal new issues, which require more changes. The cycle is:
+1. Make a change to a generator
+2. Run the generator → must be `[CLEAN]`
+3. Run full ERC → must have 0 errors
+4. If ERC fails, fix and repeat from step 1
+5. Only report the change as complete when all validators pass
+
+**Never report a change as done if validation hasn't run.** If you modified `gen_power_supply.py`, you must show the `[CLEAN]` output AND the ERC result before moving on.
+
+**Regression detection:**
+When fixing an issue on one sheet, changes can break other sheets (shared nets, hierarchy labels, bus names). Always regenerate ALL affected sheets and run full ERC — not just the sheet you modified.
+
+**Final gate before next phase:**
+Re-run ALL generators and full-project ERC as the last step before generating reports. Document results in `07-schematics.md`.
+
+**ERC error policy:**
+- ERC errors = blockers. Fix before any further work.
+- ERC warnings that are understood and documented may be accepted (list in `07-schematics.md`).
 - If an error cannot be fixed, escalate to the user. **Never suppress errors** to proceed.
-- **Final validation pass**: As the last step before generating phase reports and moving to the next phase, re-run ALL generators and full-project ERC to catch any regressions. Document the results in `07-schematics.md`.
+- `multiple_net_names` is configured as **error** severity — shorts are never acceptable.
+
+### Update Earlier Documents When Requirements Change
+- When a design decision changes during later phases (e.g., new calibration topology, added components, changed signal chain), **go back and update all affected earlier workflow documents** (requirements, architecture, block design, component selection, BOM).
+- The workflow documents are living documents — they must always reflect the current state of the design, not just the initial decisions.
+- Examples: adding N-FETs for relay coil drive → update BOM and block design. Changing AFE signal chain order (filter before amp) → update architecture. Adding VREF_BIAS circuit → update component selection.
+- If you're unsure which documents are affected, check all of them.
 
 ### Keeping the report file current
 

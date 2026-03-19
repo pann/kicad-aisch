@@ -621,6 +621,8 @@ class SchematicBuilder:
             self._sym_positions.append((x, y, pwr_ref))
             # PWR_FLAG: small fence around the symbol
             self.register_body(x, y, 2.54, 2.54, 0, pwr_ref)
+            # Register pin so co-located power symbol stubs get exemption
+            self.register_pin(x, y, pwr_ref, "1")
         else:
             self._wires.append((x, y, sx, sy))
             self._power_stubs.append((x, y, sx, sy, net_name))
