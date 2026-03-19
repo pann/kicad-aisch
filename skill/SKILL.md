@@ -41,7 +41,7 @@ The skill follows 7 phases. Each phase produces a document in `workflow/` and re
 | 4. Components | `workflow/04-component-selection.md` | Select components with LCSC part numbers |
 | 5. BOM | `workflow/05-bom.md` + `.csv` | Bill of materials, library availability check |
 | 6. KiCad Project | `workflow/06-kicad-project.md` | Project setup, component import, hierarchy |
-| 7. Schematics | `scripts/gen_*.py` + `.kicad_sch` | Generate all schematic sheets |
+| 7. Schematics | `scripts/gen_*.py` + `.kicad_sch` + `<project>_schematics.pdf` | Generate all schematic sheets, export PDF |
 
 ### Resuming
 
@@ -174,6 +174,8 @@ If $ARGUMENTS specifies a phase number (e.g., "phase 3" or "resume at block desi
 7. Fix any ERC errors, re-run until clean
 8. Export SVG for visual verification: `kicad-cli sch export svg --output /tmp/ <root.kicad_sch>`
 9. Optionally convert to PNG for review: `inkscape --export-type=png /tmp/<sheet>.svg`
+10. **Export final PDF**: `kicad-cli sch export pdf --output <project-name>_schematics.pdf <root.kicad_sch>`
+    - This is the deliverable output of Phase 7 — a single PDF containing all schematic pages
 
 ### Generator Script Pattern
 
