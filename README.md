@@ -32,22 +32,33 @@ Components are sourced from KiCad's standard libraries and LCSC/EasyEDA imports 
 - `workflow/` — Workflow phase outputs from the test project
 - `marklin-wifi-ctrl/` — Test KiCad project (Marklin WiFi AC train controller)
 
-## Prerequisites
+## Installation
 
-- KiCad 9 with `kicad-cli`
-- Python 3 with `fpdf`
-- `easyeda2kicad` for LCSC component imports
-- [Claude Code](https://claude.ai/code)
+Install the required tools, then copy the skill into Claude Code's skill directory:
 
-## Getting Started
+```bash
+# Install prerequisites
+pip install easyeda2kicad fpdf
+# KiCad 9: https://www.kicad.org/download/
 
-Install the skill in Claude Code, then describe your hardware design:
+# Install the skill (personal — available in all projects)
+cp -r skill/ ~/.claude/skills/kicad-schematic/
+
+# OR project-local (available only in one project)
+cp -r skill/ <your-project>/.claude/skills/kicad-schematic/
+```
+
+See [`skill/INSTALL.md`](skill/INSTALL.md) for full instructions including companion skills.
+
+## Usage
+
+Start Claude Code and describe your hardware design:
 
 ```
 /kicad-schematic WiFi-controlled LED matrix with ESP32-S3, 5V input, 64x32 RGB panel
 ```
 
-The skill will guide you through each phase interactively.
+The skill will guide you through each phase interactively. See [`skill/UserGuide.md`](skill/UserGuide.md) for a walkthrough.
 
 ## Documentation
 
