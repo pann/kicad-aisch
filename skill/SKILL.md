@@ -11,27 +11,31 @@ argument-hint: "[design description or phase to resume]"
 
 # KiCad SchematicBuilder Skill
 
-Generate production-ready KiCad 9 hierarchical schematics from a design description, following a structured 7-phase workflow.
+Generate production-ready KiCad 9 hierarchical schematics from a design description, following a structured 8-phase workflow.
 
 ## Prerequisites
 
 This skill works best with these companion skills installed:
 
 - **kicad-file-format** — KiCad S-expression file format reference (for reading/writing `.kicad_sch`, `.kicad_pcb`)
-- **jlcpcb-bom-generate-from-kicad** — BOM export for JLCPCB PCB assembly ordering
+- **jlcpcb-bom-generate-from-kicad** — Converts KiCad-exported BOM and `.pos` files into the JLCPCB PCBA upload format. Handles the column-name conversion (Designation→Comment, etc.) and CPL Y-coordinate negation. Used in Phase 7 (BOM CSV export) and Phase 8 (fab outputs).
 - **analyze-power-nets** / **find-high-speed-nets** / **plan-pcb-routing** — PCB layout skills (for post-schematic work)
 
 ## Required Tools
 
-- `kicad-cli` — KiCad command-line interface (ERC, SVG/PDF export)
+- `kicad-cli` — KiCad command-line interface (ERC, SVG/PDF export, BOM CSV export, gerber/drill/CPL export)
 - `easyeda2kicad` — LCSC/EasyEDA component import into KiCad format
 - `python3` — Script execution
 - `fpdf2` Python package — PDF generation for workflow documents (`pip install fpdf2`)
 - `inkscape` (optional) — SVG-to-PNG conversion for visual verification
 
+### Recommended companion skills
+
+- **jlcpcb-bom-generate-from-kicad** — Sibling skill. Handles JLCPCB column-name conversion (KiCad `Reference`/`Value` → JLCPCB `Designator`/`Comment`) and CPL Y-coordinate negation (KiCad Y-down → JLCPCB Y-up). Used in Phase 7 (BOM CSV) and Phase 8 (fab outputs).
+
 ## Workflow Overview
 
-The skill follows 7 phases. Each phase produces a document in `workflow/` and requires user review before proceeding.
+The skill follows 8 phases. Each phase produces a document in `workflow/` and requires user review before proceeding.
 
 | Phase | Output | Description |
 |-------|--------|-------------|
@@ -39,9 +43,10 @@ The skill follows 7 phases. Each phase produces a document in `workflow/` and re
 | 2. Architecture | `workflow/02-architecture.md` | MCU selection, system architecture |
 | 3. Block Design | `workflow/03-block-design.md` | Decompose into schematic blocks with interfaces |
 | 4. Components | `workflow/04-component-selection.md` | Select components with LCSC part numbers |
-| 5. BOM | `workflow/05-bom.md` + `.csv` | Bill of materials, library availability check |
+| 5. BOM Notes | `workflow/05-bom-notes.md` | Engineering rationale for part choices (the *why*); not an assembly file |
 | 6. KiCad Project | `workflow/06-kicad-project.md` | Project setup, component import, hierarchy |
-| 7. Schematics | `scripts/gen_*.py` + `.kicad_sch` + `<project>_schematics.pdf` | Generate all schematic sheets, export PDF |
+| 7. Schematics | `scripts/gen_*.py` + `.kicad_sch` + `<project>_schematics.pdf` + `BOM_jlcpcb.csv` | Generate all schematic sheets, populate LCSC/MPN fields, export PDF + assembly BOM |
+| 8. Fab Outputs | `<project>/fab/` (gerbers, drill, BOM CSV, CPL CSV, upload zip) | JLCPCB PCBA upload package |
 
 ### Resuming
 
@@ -116,17 +121,31 @@ If $ARGUMENTS specifies a phase number (e.g., "phase 3" or "resume at block desi
 
 ---
 
-## Phase 5: Bill of Materials
+## Phase 5: BOM Notes & Component Selection
+
+The deliverable here is **engineering rationale**, not an assembly spreadsheet. The assembly source of truth (the JLCPCB BOM CSV) is generated mechanically from the schematic in Phase 7 — it is not hand-maintained, and it is **not** produced in this phase. There is no `05-bom.csv` anymore.
+
+`workflow/05-bom-notes.md` captures the *why* behind each part choice so a reviewer (or future-you) can understand the decisions without re-running the comparison.
 
 ### Steps
-1. Compile complete BOM from Phase 4 with columns:
-   - Item, Block, Designator, Description, Manufacturer, MPN, Package, LCSC, Qty, Unit Price, KiCad Symbol, KiCad Footprint, Status
-2. Check KiCad standard library availability for each component:
-   - **Available** — symbol and footprint in standard KiCad libs
-   - **Substitute** — map to equivalent standard library symbol
-   - **Import** — needs easyeda2kicad import (flag these)
-3. Export BOM as CSV: `workflow/05-bom.csv`
-4. Save to `workflow/05-bom.md` + generate PDF
+1. For each block / functional group, document component selection rationale:
+   - Which parts were selected, with LCSC and MPN
+   - Alternatives considered and rejected (with reasons: cost, availability, performance, package, footprint reuse)
+   - Why this part won — call out the deciding factor (cheapest in stock, only one with required spec, footprint already used elsewhere, JLCPCB Basic vs Extended status, etc.)
+2. Flag DNP candidates with explicit DNP justification — e.g. "calibration branch disabled in production", "debug-only header", "factory programming jumper".
+3. Call out **special components** that need narrative beyond a generic LCSC family pick:
+   - Precision passives (e.g. 0.1 % thin-film with explicit TCR spec)
+   - Polypropylene film capacitors (low-loss audio/signal)
+   - Foil resistors, current-sense resistors with Kelvin sense
+   - 4-terminal Kelvin sense networks
+   - Anything where "any 0603 1k" would be wrong
+4. Identify **single-source / consignment parts** and flag stock-margin concerns. If JLCPCB doesn't stock the part (consignment), say so explicitly so it gets the `Source = Consignment` field in Phase 7.
+5. Document **deferred decisions** and known stock risks (e.g. "main MCU is sole-sourced from ST; alternative footprint-compatible part TBD if lead time slips").
+6. Save to `workflow/05-bom-notes.md` + generate PDF: `python3 ${CLAUDE_SKILL_DIR}/scripts/md_to_pdf.py workflow/05-bom-notes.md`
+
+### Why no CSV here
+
+The CSV that JLCPCB ingests is generated by `kicad-cli sch export bom` from the schematic itself, after Phase 7 populates `LCSC` and `MPN` custom fields on every symbol. Hand-maintaining a parallel CSV in Phase 5 used to drift out of sync the moment a part was swapped in the schematic. The schematic is now the single source of truth; the BOM Notes document is supporting commentary.
 
 ---
 
@@ -174,8 +193,36 @@ If $ARGUMENTS specifies a phase number (e.g., "phase 3" or "resume at block desi
 7. Fix any ERC errors, re-run until clean
 8. Export SVG for visual verification: `kicad-cli sch export svg --output /tmp/ <root.kicad_sch>`
 9. Optionally convert to PNG for review: `inkscape --export-type=png /tmp/<sheet>.svg`
-10. **Export final PDF**: `kicad-cli sch export pdf --output <project-name>_schematics.pdf <root.kicad_sch>`
-    - This is the deliverable output of Phase 7 — a single PDF containing all schematic pages
+10. **Add `LCSC` + `MPN` custom fields to every schematic symbol** (see "LCSC/MPN field population" below). This binds the BOM Notes to the actual symbols.
+11. **Export the assembly BOM CSV**:
+    ```bash
+    kicad-cli sch export bom --output BOM_jlcpcb.csv \
+        --fields "Reference,Value,Footprint,LCSC,MPN" <root.kicad_sch>
+    ```
+    This CSV is the **assembly source of truth**. The `05-bom-notes.md` document is rationale, not the bill that gets uploaded.
+12. **Export final PDF**: `kicad-cli sch export pdf --output <project-name>_schematics.pdf <root.kicad_sch>`
+    - One of the deliverable outputs of Phase 7 — a single PDF containing all schematic pages.
+
+### LCSC/MPN field population
+
+After all sheets are clean and ERC passes, before declaring Phase 7 done, every symbol instance in every `*.kicad_sch` must carry:
+
+- `LCSC` — the JLCPCB part number (e.g. `C150716`)
+- `MPN` — the manufacturer part number (e.g. `AP2114H-3.3TRG1`)
+- Optional: `Source` set to `Consignment` for parts JLCPCB doesn't stock (per Phase 5 BOM Notes)
+
+Rules:
+
+- For every `(symbol ...)` block in every `.kicad_sch` file, add the `LCSC` and `MPN` properties as KiCad custom fields.
+- Set `(hide yes)` on these fields so they don't visually clutter the schematic — they exist only as metadata for BOM export.
+- The operation must be **idempotent**: re-running should update existing `LCSC`/`MPN` fields, not duplicate them. If the field already exists, overwrite the value; do not append a second copy.
+- Source the values from Phase 5 BOM Notes (`05-bom-notes.md`), keyed by the component reference designator. If a symbol's reference does not have an LCSC/MPN entry in Phase 5, that's a gap — flag it and add it to BOM Notes before proceeding.
+
+After the fields are populated, run `kicad-cli sch export bom` (step 11 above) to generate the assembly CSV. Verify:
+
+- Row count matches the populated symbol count
+- No empty `LCSC` cells (except deliberately blank ones for jumpers, mounting holes, fiducials — these should also be marked DNP if not assembled)
+- `Footprint` column matches what's actually placed on the PCB (Phase 8)
 
 ### Generator Script Pattern
 
@@ -232,6 +279,53 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+---
+
+## Phase 8: Fab Outputs (JLCPCB upload)
+
+Generate everything JLCPCB needs for a PCBA order. All outputs go to `<project>/fab/`, which is **`.gitignore`d** — these files are regenerated per release rather than committed. Tag the source commit (e.g. `<project>-hw-1`) instead.
+
+### Steps
+
+1. **Gerbers + drill**
+   ```bash
+   kicad-cli pcb export gerbers --output <project>/fab/ <project>/<project>.kicad_pcb
+   kicad-cli pcb export drill   --output <project>/fab/ <project>/<project>.kicad_pcb
+   ```
+
+2. **BOM CSV** (assembly bill of materials, the same one Phase 7 generated)
+   ```bash
+   kicad-cli sch export bom \
+       --output <project>/fab/BOM_kicad.csv \
+       --fields "Reference,Value,Footprint,LCSC,MPN" \
+       <project>/<project>.kicad_sch
+   ```
+   JLCPCB expects columns: **Comment** (= Value), **Designator** (= Reference), **Footprint**, **LCSC Part #**. Use the `jlcpcb-bom-generate-from-kicad` companion skill to convert column names — it also handles the JLCPCB-specific quirks (designator sorting, comment formatting).
+
+3. **CPL (Component Placement List)**
+   ```bash
+   kicad-cli pcb export pos \
+       --output <project>/fab/CPL_kicad.csv \
+       --format csv --units mm --side both \
+       <project>/<project>.kicad_pcb
+   ```
+   The `jlcpcb-bom-generate-from-kicad` skill negates Y-coordinates (KiCad uses Y-down, JLCPCB CPL expects Y-up), normalises rotation, and emits the JLCPCB-format CPL.
+
+4. **Output package** — produce a single `.zip` with the gerbers + drill + JLCPCB-format BOM + JLCPCB-format CPL:
+   ```
+   <project>/fab/<project>-<rev>.zip
+   ```
+   Or three separate files (gerber zip, BOM CSV, CPL CSV) if the JLCPCB UI prefers per-file upload — check the current JLCPCB workflow.
+
+5. **`<project>/fab/` is `.gitignore`d**. Do not commit the generated artefacts. Tag the source commit so the fab outputs can be regenerated deterministically: `git tag -a <project>-hw-1 -m "..."`.
+
+### Verification
+
+Before uploading:
+- Open the gerber zip in a viewer (gerbv, KiCad gerber viewer) — confirm all layers present and aligned
+- Spot-check the BOM CSV: row count matches Phase 7 export, no empty LCSC cells, no stale parts
+- Spot-check the CPL: designator count matches BOM, rotation values are sane (0/90/180/270), Y has been negated relative to KiCad's pos export
 
 ---
 
@@ -296,6 +390,12 @@ No manual `register_body()` or `register_pin()` calls needed — all components 
 
 **Power symbols** are also fenced: `place_power()` registers a 3.81mm fence around each GND/VCC symbol graphic. The stub wire is exempted via pin registration. This prevents other wires from crossing through power symbol graphics.
 
+**Net/hierarchical/global labels** are also fenced: `add_net_label()`, `add_hlabel()`, `add_global_label()`, `add_bus_hlabel()`, and `add_bus_net_label()` automatically register a tight bounding box around the label TEXT. Two checks run on these:
+- **Label-vs-label overlap** — flagged when two labels' text bounding boxes intersect (e.g. relay_pair sheet pin labels overlapping bus tap labels, or a `{MUX_CTRL}` bus hlabel landing at the same y as an `FMC_SDNE1` tap label on a nearby bus column)
+- **Wire-through-label** — flagged when a wire passes through a label's text region (excluding the label's own stub which legitimately ends at the anchor point)
+
+This catches the readability issues where text becomes unreadable due to overlap. To fix: move the label, route the wire around, or shorten/rename the label.
+
 **Pin exemption**: Wires connecting to a registered pin of the component are allowed inside the fence. Only non-connecting wires are flagged.
 
 Manual `register_body()` can still be used to override or add custom fences if needed.
@@ -355,10 +455,14 @@ These rules are enforced by `sb.validate()` which runs automatically on `sb.writ
 1. **Wire segments must terminate at pin locations** — KiCad does NOT connect a pin that falls in the middle of a wire segment. Break long bus wires into segments that end at each component pin.
 2. **Prefer direct wires over net labels** — Use net labels only when wires would cross or span long distances (>50mm). For nearby connections, use a wire.
 3. **Add junctions at T-intersections** — Where three or more wire endpoints meet, add `sb.add_junction()`.
-4. **Wires must extend OUT from component pins** — Never route a wire back into or through a component body. Route around components so wires approach pins from outside.
+4. **Wires must NEVER pass through component fences** — A "fence" is the bounding box of a symbol (including power symbols and their stubs). No wire segment may cross through any fence unless one of its endpoints is a pin OF that component. Route wires around components. This includes power symbol stub regions — a `place_power()` call creates a fence around the symbol AND its stub wire; other wires must not cross through that area. The validator flags these as "passes through fence of" warnings. **These must be fixed before declaring a sheet complete** — they indicate visual clutter and potential accidental connections.
+4b. **Wires must extend OUT from component pins** — Never route a wire back into or through a component body. Route around components so wires approach pins from outside.
 5. **Output hlabels on rightmost symbols** — Place input hlabels on the left side and output hlabels on the rightmost symbols for left-to-right signal flow.
+5b. **Sheet symbol pin side follows signal direction** — On hierarchical sheet boxes (parent sheet), place input pins (`input` shape, signals coming INTO the sub-sheet from this parent) on the **LEFT** edge with `angle=180`. Place output pins (`output` shape, signals leaving the sub-sheet) and bidirectional pins that act as outputs from the sub-sheet on the **RIGHT** edge with `angle=0`. This makes signal flow visually obvious: external sources arrive on the left, sub-sheet results exit on the right. Mixed-direction sheet pins on the same edge are confusing — split them by side based on direction.
 6. **No overlapping collinear wires** — KiCad merges overlapping wires at the same x or y, losing intermediate endpoints. This includes label stubs and power stubs.
+6b. **Wires must not pass through label text regions** — Net labels and bus hlabels have a text bounding box that extends from the label point in the text direction. Wires that cross through this region make the schematic unreadable. Use short net names when space is tight, and orient labels (angle 0 vs 180) so text extends into empty space. The validator flags these as "passes through text region of label" warnings — fix before declaring the sheet complete.
 7. **All wires must be horizontal or vertical** — No diagonal wires. Use L-shaped bends.
+7b. **Buses must not cross each other** — Place each bus at a unique x column with enough horizontal spacing so diagonal bus taps from one bus don't reach another bus's vertical line. Minimum gap between bus x positions should be the tap diagonal width (2.54mm) plus label text width plus clearance (~15mm total). If two buses serve adjacent pin groups at the same x, stagger them: place the shorter bus closer to the IC and the longer bus further out.
 8. **One hlabel per net per sheet** — Use `add_net_label()` for additional connections to the same net.
 9. **Register pins for validation** — After `place_sym()`, call `sb.register_pin(x, y, ref, pin)` for each pin. The validator checks registered pins don't fall mid-wire.
 
@@ -415,6 +519,53 @@ sb.add_junction(82, 40)
 
 **General rule**: Every point where another wire meets a bus must be a segment endpoint, not a midpoint.
 
+### Recipe 2b: Bus wires must not cross through bus tap regions
+
+**Problem**: Multiple vertical bus columns with taps are connected to sheet box pins via horizontal bus wires. The horizontal buses cross through other columns' tap regions, creating a visual mess of overlapping diagonal entries, labels, and bus wires.
+
+**WRONG** — horizontal bus wires crossing through tap regions of other bus columns:
+```python
+# Three bus columns at x=240, x=260, x=280, all with taps going left.
+# Sheet box pins at x=310, y=65/70/75.
+# Horizontal bus from (240, 75) to (310, 75) crosses the tap regions
+# of the x=260 and x=280 columns, making labels unreadable.
+sb.add_bus(240, 75, 310, 75)  # crosses through other tap zones!
+sb.add_bus(260, 70, 310, 70)  # crosses through x=280 tap zone!
+```
+
+**RIGHT** — route horizontal buses ABOVE or BELOW all tap regions, then drop vertically to each column:
+```python
+# Route all horizontal buses above the tap region (e.g., y=55)
+# then vertical drops to each column top.
+bus_route_y = 55  # above all taps (taps start at y=62+)
+
+# FMC_D column at x=280, pin at (310, 65)
+sb.add_bus(310, 65, 280, 65)      # horizontal from pin to column
+sb.add_bus(280, 65, 280, 105)     # vertical column with taps
+
+# FMC_A column at x=260, pin at (310, 70)
+sb.add_bus(310, 70, 260, 70)      # horizontal from pin
+sb.add_bus(260, 70, 260, bus_route_y)  # up to clear route
+sb.add_bus(260, bus_route_y, 260, 100) # taps start below bus_route_y
+# ...but this still has taps in the crossing zone.
+```
+
+**BEST** — space columns far enough apart so their tap regions (entries + labels + stubs) don't overlap, and route horizontal buses only within the clear space above the topmost tap:
+```python
+# Space bus columns >= 20mm apart (tap region extends ~13mm from bus).
+# Route horizontal bus segments to arrive at each column's TOP,
+# above all tap entries. Taps extend downward from the column top.
+fmc_d_x = 280  # rightmost, closest to sheet box
+fmc_a_x = 255  # 25mm gap — tap labels don't overlap
+fmc_c_x = 230  # 25mm gap
+
+# Horizontal buses from sheet pins connect at column tops.
+# Each column's taps are entirely below the horizontal bus level.
+# No horizontal bus wire passes through any tap region.
+```
+
+**General rule**: Bus wires must never cross through regions containing bus taps from other bus columns. Each bus column's tap region (bus entries + signal wires + net labels) must be visually clear of crossing bus traffic. Space columns far enough apart (>= 20mm for `label_side="left"` taps) and route horizontal connections above or below all tap zones.
+
 ### Recipe 3: Power symbol stubs — avoiding overlaps
 
 **Problem**: Two GND symbols on the same IC at the same x-coordinate create overlapping vertical stubs.
@@ -467,25 +618,58 @@ sb.add_net_label("SIG", 60, 60, 0)  # stub from (60,60) to (67.62,60) — this I
 
 ### Recipe 5: IC pin routing — never through the body
 
-**Problem**: Need to wire an op-amp's output back to -IN for feedback. Both pins are on the same IC.
+**Problem**: Need to wire a component pin to something on the opposite side of the IC. This applies to:
+- Same-IC feedback (op-amp output → -IN)
+- IC pin → power symbol on the opposite side
+- IC pin → external component on the opposite side
+- IC pin → net label on the opposite side
 
-**WRONG** — wire through the IC body:
+**WRONG** — wire through the IC body (same-IC feedback):
 ```python
 # OPA output at (111.43, 72.38), -IN at (111.43, 74.92)
 sb.add_wire(111.43, 72.38, 111.43, 74.92)  # vertical through IC body
 ```
 
-**RIGHT** — route outside the body:
+**WRONG** — wire from a right-side pin to a power symbol on the left side:
 ```python
-out_pin = (111.43, 72.38)
-nin_pin = (111.43, 74.92)
-fb_x = 111.43 + 15  # route right, outside the body
-sb.add_wire(out_pin[0], out_pin[1], fb_x, out_pin[1])  # horizontal out
-sb.add_wire(fb_x, out_pin[1], fb_x, nin_pin[1])        # vertical
-sb.add_wire(fb_x, nin_pin[1], nin_pin[0], nin_pin[1])   # horizontal back
+# ADG1406 GND/VSS pins on the right side at (cx+8.89, cy+25.40)
+# -5VA power symbol placed on the LEFT side of the IC
+gnd_pin = (cx + 8.89, cy + 25.40)
+vss_pin = (cx + 8.89, cy + 27.94)
+# These wires drop down then route LEFT, passing UNDER the IC body
+sb.add_wire(gnd_pin[0], gnd_pin[1], gnd_pin[0], gnd_pin[1] + 5)
+sb.add_wire(gnd_pin[0], gnd_pin[1] + 5, cx - 15, gnd_pin[1] + 5)  # crosses body!
+sb.place_power("-5VA", cx - 15, gnd_pin[1] + 5)
+```
+The fence validator may NOT catch this if both endpoints are at registered pins (the IC pin AND the power symbol pin), so visual inspection is required.
+
+**RIGHT** — power symbol on the SAME side as the pin:
+```python
+# Right-side IC pins → power symbol routed RIGHT, away from the body
+gnd_pin = (cx + 8.89, cy + 25.40)
+sb.add_wire(gnd_pin[0], gnd_pin[1], gnd_pin[0] + 7.62, gnd_pin[1])
+sb.place_power("GND", gnd_pin[0] + 7.62, gnd_pin[1])
+# Or: route DOWN below the IC body, then to a power symbol
+sb.add_wire(gnd_pin[0], gnd_pin[1], gnd_pin[0], cy + body_half_h + 5)
+sb.place_power("GND", gnd_pin[0], cy + body_half_h + 5)
 ```
 
-**General rule**: Left-side IC pins → route LEFT then around. Right-side pins → route RIGHT then around. Top pins → route UP. Bottom → DOWN. Never cross through the component rectangle.
+**RIGHT** — for opposite-side power symbols, route AROUND the body:
+```python
+# If you must use a power symbol on the opposite side, route around the IC:
+gnd_pin = (cx + 8.89, cy + 25.40)
+detour_y = cy + body_half_h + 7  # below the IC body
+sb.add_wire(gnd_pin[0], gnd_pin[1], gnd_pin[0], detour_y)  # down past body
+sb.add_wire(gnd_pin[0], detour_y, cx - 15, detour_y)        # left, BELOW body
+sb.add_wire(cx - 15, detour_y, cx - 15, target_y)            # up to target
+sb.place_power("-5VA", cx - 15, target_y)
+```
+
+**General rules**:
+1. **Left-side IC pins → route LEFT then around. Right-side pins → route RIGHT then around. Top pins → route UP. Bottom → DOWN.** Never cross through the component rectangle.
+2. **Power symbols belong on the SAME SIDE as the pin they connect to.** A right-side pin gets a right-side or below-body power symbol — never a left-side one with a wire crossing the body.
+3. **Net labels and external destinations follow the same rule.** If the destination is on the opposite side of an IC, the wire MUST detour around the body (above or below), not through it.
+4. **The fence validator has a blind spot**: if both wire endpoints are at registered pins, the wire is exempted from the through-body check. Crossing-body wires between two valid pins (e.g., IC pin and power symbol) will pass validation but are still wrong. Always visually inspect SVG output for body crossings.
 
 ### Recipe 6: Computing connector pin positions
 
@@ -575,6 +759,8 @@ sb.add_wire(mid_x, 111.76, 121.92, 111.76)
 | Wire through fence | WARNING | Wire inside component keep-out zone without connecting to a pin |
 | Power stub isolation | ERROR | Power symbol's far endpoint touches another wire — accidental short |
 | Symbol inside fence | WARNING | A symbol (component or power) placed inside another component's fence |
+| Label-vs-label overlap | WARNING | Two labels' text bounding boxes intersect — text becomes unreadable |
+| Wire through label | WARNING | Wire passes through a label's text region (excluding the label's own stub) |
 
 ### Using `register_pin()` for pin validation
 
@@ -605,7 +791,7 @@ A sheet is **not ready** until `sb.write()` prints `[CLEAN]`. The workflow is:
 6. Export SVG for visual check
 
 ### Validation Is Mandatory After Every Change
-- **Every time a generator script is modified, ALL THREE validation levels must run before reporting the change as complete.** This is not optional — never skip validation, even for "small" changes.
+- **BLOCKING REQUIREMENT: Every time a schematic file is created or modified — whether by running a generator script, editing a `.kicad_sch` file directly, or any other means — ALL THREE validation levels below must run and pass before the change is considered complete.** This is not optional. Never skip validation, never defer it, never report a change as done without showing validator output. Even trivial, one-line changes require full validation.
 
 **Level 1: Generator validation (per-sheet)**
 After modifying any `gen_*.py` file, immediately run it:
@@ -739,6 +925,18 @@ Re-run ALL generators and full-project ERC as the last step before generating re
 ### PCB Pads Need Schematic Symbols
 - Every PCB solder pad needs a schematic symbol
 - Use `Connector:TestPoint` with `TestPoint:TestPoint_Pad_2.0x2.0mm` footprint as default
+
+### Test Points on Power Nets
+- **Every global power net** must have at least one `Connector:TestPoint` symbol connected to it. This includes all positive rails (+3V3, +5V, +5VA, +5VD, etc.), negative rails (-5VA, etc.), and GND.
+- **GND must have at least 3 test points**, distributed across different sheets to provide convenient probe access near each major circuit block.
+- Use `TestPoint:TestPoint_Pad_D1.0mm` footprint for minimal board area.
+- To connect a test point to a power net: place the TestPoint symbol, add a short horizontal wire from the TP pin (at the symbol origin), then `place_power()` at the far end of the wire. Do **not** place the power symbol directly at the TP origin — the power stub's vertical wire will pass through the TestPoint body fence.
+- Reference designators: use `TPnnn` where `nnn` matches the sheet's component numbering block (e.g., TP200–TP206 on the power supply sheet, TP400–TP404 on the VCCS sheet).
+- Place test points in empty areas of the sheet — typically in a row below or beside the main circuit, using `add_net_label()` for signal nets or `place_power()` via a short wire for power nets.
+
+### Symbols Carry LCSC / MPN — BOM CSV Is Generated, Never Hand-Maintained
+- Every schematic symbol carries `LCSC` and `MPN` as KiCad custom fields (set `(hide yes)` so they don't clutter the canvas). Use KiCad's BOM exporter (`kicad-cli sch export bom --fields "Reference,Value,Footprint,LCSC,MPN"`) to produce the assembly CSV that JLCPCB ingests.
+- **Never hand-maintain a BOM CSV.** The `workflow/05-bom-notes.md` document is engineering rationale only — it does not get uploaded anywhere. The schematic is the single source of truth for what is on the board. If you need to change a part, change it on the symbol (LCSC/MPN fields), regenerate the CSV, and update BOM Notes with the rationale.
 
 ---
 

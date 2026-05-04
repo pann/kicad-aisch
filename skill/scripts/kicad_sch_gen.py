@@ -86,6 +86,15 @@ def u():
     return str(_uuid.uuid4())
 
 
+def is_bus_name(name):
+    """Return True if name is a bus signal: vector bus [x..y] or named {a,b,c}."""
+    if "[" in name and ".." in name:
+        return True
+    if name.startswith("{") and name.endswith("}"):
+        return True
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Symbol extraction helpers
 # ---------------------------------------------------------------------------
@@ -302,23 +311,28 @@ def net_label(name, x, y, angle=0):
     return wire(min(x, lx), y, max(x, lx), y) + '\n' + label
 
 
-def global_label(name, x, y, angle, shape="input"):
-    """Create a global label with a wire stub.
+def global_label(name, x, y, angle, shape="bidirectional"):
+    """Create a global label with a wire/bus stub.
 
-    x = component pin tip (inner wire end).
-    Wire stub direction follows same convention as net_label/hlabel.
+    (x, y) is the LABEL anchor (the at coord). The wire stub extends OUT
+    from the label toward its connection point:
+      angle=0   → text extends RIGHT, stub goes LEFT (to x-STUB)
+      angle=180 → text extends LEFT,  stub goes RIGHT (to x+STUB)
+    Bus-named signals (e.g. {SPI}, EL_AFE_[1..16]) get a bus wire stub.
     """
     x, y = snap(x), snap(y)
     just = "right" if angle == 180 else "left"
-    dx = STUB if angle == 180 else -STUB
+    dx = -STUB if angle == 0 else STUB
     lx = snap(x + dx)
     label = (f'\t(global_label "{name}"\n'
              f'\t\t(shape {shape})\n'
-             f'\t\t(at {lx} {y} {angle})\n'
+             f'\t\t(at {x} {y} {angle})\n'
              f'\t\t(fields_autoplaced yes)\n'
              f'\t\t(effects (font (size 1.27 1.27)) (justify {just} bottom))\n'
              f'\t\t(uuid "{u()}")\n'
              f'\t)')
+    if is_bus_name(name):
+        return bus_wire(min(x, lx), y, max(x, lx), y) + '\n' + label
     return wire(min(x, lx), y, max(x, lx), y) + '\n' + label
 
 
@@ -393,17 +407,27 @@ class SchematicBuilder:
         self._wires = []            # [(x1, y1, x2, y2), ...] all wire segments
         self._junctions = set()     # {(x, y), ...}
         self._hlabel_names = defaultdict(list)  # name -> [(x, y), ...]
-        self._net_label_positions = defaultdict(list)  # name -> [(x, y), ...]
         self._pins = []             # [(x, y, ref, pin_num), ...] registered pins
         self._bodies = []           # [(x1, y1, x2, y2, ref), ...] component body rects
         self._power_stubs = []      # [(cx, cy, sx, sy, net), ...] power stub endpoints
         self._sym_positions = []    # [(x, y, ref), ...] all placed symbol centers
         self._bus_aliases = {}      # {alias_name: [member1, member2, ...]}
         self._declared_nets = {}    # {net_name: [(ref, pin), ...]} for net validation
+        # Label text bounding boxes for label-vs-label and wire-through-label checks.
+        # Each entry: (bx1, by1, bx2, by2, name, anchor_x, anchor_y)
+        # The anchor (label position) is exempt from "wire endpoint inside fence"
+        # since the label's own stub legitimately touches it.
+        self._label_fences = []
 
     @property
     def inst_path(self):
-        """Instance path for this sheet: /<root_uuid>/<sheet_inst_uuid>."""
+        """Instance path for this sheet.
+
+        For sub-sheets: /<root_uuid>/<sheet_inst_uuid>
+        For the top-level (when sheet_inst_uuid is empty/None): "/"
+        """
+        if not self.sheet_inst_uuid:
+            return "/"
         return f"/{self.root_uuid}/{self.sheet_inst_uuid}"
 
     def add_lib(self, lib_prefix, lib_path, sym_names):
@@ -620,9 +644,10 @@ class SchematicBuilder:
         if net_name == "PWR_FLAG":
             self._elements.append(sym)
             self._sym_positions.append((x, y, pwr_ref))
-            # PWR_FLAG: small fence around the symbol
+            # PWR_FLAG: small fence around the symbol + pin at connection point
+            # (without the pin registration, wires connecting to PWR_FLAG would
+            # be flagged as "wire through fence" — the pin exemption is needed)
             self.register_body(x, y, 2.54, 2.54, 0, pwr_ref)
-            # Register pin so co-located power symbol stubs get exemption
             self.register_pin(x, y, pwr_ref, "1")
         else:
             self._wires.append((x, y, sx, sy))
@@ -681,6 +706,7 @@ class SchematicBuilder:
                  f'\t)')
         self._elements.append(bus_wire(min(x, lx), y, max(x, lx), y))
         self._elements.append(label)
+        self._register_label_fence(name, lx, y, angle)
 
     def add_bus_net_label(self, name, x, y, angle=0):
         """Add a net label with a bus wire stub (for labeling bus wires)."""
@@ -697,6 +723,7 @@ class SchematicBuilder:
                  f'\t)')
         self._elements.append(bus_wire(min(x, lx), y, max(x, lx), y))
         self._elements.append(label)
+        self._register_label_fence(name, lx, y, angle)
 
     def add_bus(self, x1, y1, x2, y2):
         """Add a bus wire between two points (thick line for signal groups)."""
@@ -735,27 +762,125 @@ class SchematicBuilder:
         tap_y = snap(tap_y)
 
         if label_side == "left":
-            # Bus entry: (at) on the bus, (size) pointing to signal wire
-            # Bus point: (bus_x, tap_y)
-            # Signal point: (bus_x - 2.54, tap_y - 2.54)
+            # Bus end at (bus_x, tap_y). Signal end at (bus_x - 2.54, tap_y - 2.54)
             sig_x = snap(bus_x - 2.54)
             sig_y = snap(tap_y - 2.54)
-            self.add_bus_entry(bus_x, tap_y, -2.54, -2.54)
-            # Wire from signal point going left to label
+            self.add_bus_entry(sig_x, sig_y, 2.54, 2.54)
+            # Short explicit wire at the signal end (KiCad needs a wire touching
+            # the bus entry, label stubs alone don't satisfy the connection check)
             wire_end_x = snap(sig_x - 2.54)
             self.add_wire(wire_end_x, sig_y, sig_x, sig_y)
+            # Net label at the wire end, pointing LEFT
             self.add_net_label(label_name, wire_end_x, sig_y, 180)
         else:
-            # Bus entry: (at) on the bus, (size) pointing to signal wire
-            # Bus point: (bus_x, tap_y)
-            # Signal point: (bus_x + 2.54, tap_y - 2.54)
+            # Bus end at (bus_x, tap_y). Signal end at (bus_x + 2.54, tap_y - 2.54)
             sig_x = snap(bus_x + 2.54)
             sig_y = snap(tap_y - 2.54)
-            self.add_bus_entry(bus_x, tap_y, 2.54, -2.54)
-            # Wire from signal point going right to label
+            self.add_bus_entry(sig_x, sig_y, -2.54, 2.54)
+            # Short explicit wire at the signal end
             wire_end_x = snap(sig_x + 2.54)
             self.add_wire(sig_x, sig_y, wire_end_x, sig_y)
+            # Net label at the wire end, pointing RIGHT
             self.add_net_label(label_name, wire_end_x, sig_y, 0)
+
+    def add_bus_column(self, bus_x, top_y, signals, label_side="left",
+                       bottom_extend=2.54):
+        """Add a vertical bus column with properly segmented bus wire and taps.
+
+        Creates a vertical bus wire broken into segments at each tap point
+        (bus entries connect at segment endpoints, not mid-segment — required
+        by KiCad ERC). Each tap gets a bus entry + net label.
+
+        Args:
+            bus_x:      X position of the vertical bus wire
+            top_y:      Y position of the bus wire top (connection point)
+            signals:    List of signal names for bus taps (top to bottom)
+            label_side: "left" or "right" for tap label placement
+            bottom_extend: Extra bus wire below the last tap (default 2.54mm)
+        """
+        bus_x = snap(bus_x)
+        top_y = snap(top_y)
+
+        # Compute tap_y for each signal
+        tap_ys = [snap(top_y + (i + 1) * 2.54) for i in range(len(signals))]
+        bottom_y = snap(tap_ys[-1] + bottom_extend) if tap_ys else top_y
+
+        # Build segmented bus wire: top → tap1 → tap2 → ... → bottom
+        segment_points = [top_y] + tap_ys + [bottom_y]
+        for i in range(len(segment_points) - 1):
+            self.add_bus(bus_x, segment_points[i], bus_x, segment_points[i + 1])
+
+        # Add taps at each segment boundary
+        for sig, ty in zip(signals, tap_ys):
+            self.add_bus_tap(sig, bus_x, ty, label_side=label_side)
+
+    def add_top_sheet_frame(self, sinst_uuid, filename, sheetname, page,
+                            x, y, w, h, pins=None):
+        """Add a hierarchical sheet box on a top-level schematic.
+
+        Top-level sheet boxes carry an `(instances ...)` block declaring
+        which page the referenced sub-sheet appears on. Sub-sheet boxes
+        (created by per-sheet make_*_sheet helpers) do NOT have this block.
+
+        Args:
+            sinst_uuid: UUID for the sheet instance (matches sub-sheet's
+                       sheet_inst_uuid)
+            filename:   Sub-sheet filename (e.g. "power_supply.kicad_sch")
+            sheetname:  Display name shown above the box
+            page:       Page label string (e.g. "2")
+            x, y:       Top-left corner position (mm)
+            w, h:       Box dimensions (mm)
+            pins:       Optional list of (name, shape, px, py, angle) tuples
+                       for sheet pins. Coordinates are absolute (not relative).
+        """
+        x, y, w, h = snap(x), snap(y), snap(w), snap(h)
+        pins_str = ""
+        if pins:
+            for (pname, pshape, bx, by, pangle) in pins:
+                bx, by = snap(bx), snap(by)
+                just = "right" if pangle == 0 else "left"
+                pins_str += (
+                    f'\t\t(pin "{pname}" {pshape}\n'
+                    f'\t\t\t(at {bx} {by} {pangle})\n'
+                    f'\t\t\t(effects (font (size 1.27 1.27)) (justify {just}))\n'
+                    f'\t\t\t(uuid "{u()}")\n'
+                    f'\t\t)\n'
+                )
+        sheet_sexp = (
+            f'\t(sheet\n'
+            f'\t\t(at {x} {y})\n'
+            f'\t\t(size {w} {h})\n'
+            f'\t\t(exclude_from_sim no)\n'
+            f'\t\t(in_bom yes)\n'
+            f'\t\t(on_board yes)\n'
+            f'\t\t(dnp no)\n'
+            f'\t\t(fields_autoplaced yes)\n'
+            f'\t\t(stroke (width 0.1524) (type solid))\n'
+            f'\t\t(fill (color 0 0 0 0.0000))\n'
+            f'\t\t(uuid "{sinst_uuid}")\n'
+            f'\t\t(property "Sheetname" "{sheetname}"\n'
+            f'\t\t\t(at {x} {snap(y - 1.27)} 0)\n'
+            f'\t\t\t(effects (font (size 1.27 1.27)) (justify left bottom))\n'
+            f'\t\t)\n'
+            f'\t\t(property "Sheetfile" "{filename}"\n'
+            f'\t\t\t(at {x} {snap(y + h + 1.27)} 0)\n'
+            f'\t\t\t(effects (font (size 1.27 1.27)) (justify left top) hide)\n'
+            f'\t\t)\n'
+            f'{pins_str}'
+            f'\t\t(instances\n'
+            f'\t\t\t(project "{self.project_name}"\n'
+            f'\t\t\t\t(path "/{self.root_uuid}"\n'
+            f'\t\t\t\t\t(page "{page}")\n'
+            f'\t\t\t\t)\n'
+            f'\t\t\t)\n'
+            f'\t\t)\n'
+            f'\t)'
+        )
+        self._elements.append(sheet_sexp)
+        # Register the body for fence checks (no pin exemption needed —
+        # the sheet pins are connection points, not symbol pins)
+        self.register_body(x + w / 2, y + h / 2, w / 2, h / 2,
+                           ref=f"Sheet:{sheetname}")
 
     def add_junction(self, x, y):
         """Add a junction at the given position."""
@@ -767,22 +892,101 @@ class SchematicBuilder:
         """Add a no-connect marker."""
         self._elements.append(no_connect(x, y))
 
+    def add_text(self, text, x, y, size=1.27, angle=0, justify="left"):
+        """Add a text annotation (graphical text, no electrical meaning).
+
+        Use for documentation: equations, circuit notes, transfer functions.
+        Multi-line text is supported via embedded newlines (\\n).
+
+        Args:
+            text:    The text string. Use \\n for line breaks.
+            x, y:    Anchor position (mm)
+            size:    Font size in mm (default 1.27)
+            angle:   Rotation in degrees (default 0)
+            justify: "left", "center", or "right" (default "left")
+        """
+        x, y = snap(x), snap(y)
+        # KiCad escapes newlines as \n inside the text string
+        escaped = text.replace('\n', '\\n')
+        text_sexp = (
+            f'\t(text "{escaped}"\n'
+            f'\t\t(exclude_from_sim no)\n'
+            f'\t\t(at {x} {y} {angle})\n'
+            f'\t\t(effects\n'
+            f'\t\t\t(font (size {size} {size}))\n'
+            f'\t\t\t(justify {justify} bottom)\n'
+            f'\t\t)\n'
+            f'\t\t(uuid "{u()}")\n'
+            f'\t)'
+        )
+        self._elements.append(text_sexp)
+
+    def _register_label_fence(self, name, lx, ly, angle, extra_chars=0):
+        """Register a text bounding box around a label for fence validation.
+
+        The text extends in the direction opposite to the wire stub: for
+        angle=0 the wire goes right and the text extends right from lx;
+        for angle=180 the wire goes left and the text extends left.
+
+        Args:
+            name:        Label text
+            lx, ly:      Label anchor position (where the wire stub ends)
+            angle:       0 (text right), 180 (text left), 90 (text up), 270 (text down)
+            extra_chars: Extra character widths added as clearance (default 0)
+        """
+        # KiCad labels are bottom-anchored: text occupies [lx..lx+text_w] in x
+        # and [ly-text_h..ly] in y for angle=0. Use tight bounds (no clearance)
+        # so adjacent rows at 1.27mm spacing don't false-positive each other.
+        # Empirical char width measured from KiCad SVG export at size 1.27.
+        char_w = 1.2   # actual KiCad rendering width per character
+        text_h = 1.27
+        clearance = 0.0
+        text_w = (len(name) + extra_chars) * char_w
+        if angle == 0 or angle == 360:
+            bx1 = lx - clearance
+            bx2 = lx + text_w + clearance
+            by1 = ly - text_h - clearance
+            by2 = ly + clearance
+        elif angle == 180:
+            bx1 = lx - text_w - clearance
+            bx2 = lx + clearance
+            by1 = ly - text_h - clearance
+            by2 = ly + clearance
+        elif angle == 90:
+            bx1 = lx - clearance
+            bx2 = lx + text_h + clearance
+            by1 = ly - text_w - clearance
+            by2 = ly + clearance
+        else:  # 270
+            bx1 = lx - text_h - clearance
+            bx2 = lx + clearance
+            by1 = ly - clearance
+            by2 = ly + text_w + clearance
+        self._label_fences.append((bx1, by1, bx2, by2, name, lx, ly))
+
     def add_net_label(self, name, x, y, angle=0):
         """Add a net label with wire stub."""
         x, y = snap(x), snap(y)
         dx = -STUB if angle == 180 else STUB
         lx = snap(x + dx)
         self._wires.append((min(x, lx), y, max(x, lx), y))
-        self._net_label_positions[name].append((x, y))
         self._elements.append(net_label(name, x, y, angle))
+        self._register_label_fence(name, lx, y, angle)
 
-    def add_global_label(self, name, x, y, angle, shape="input"):
-        """Add a global label with wire stub."""
+    def add_global_label(self, name, x, y, angle, shape="bidirectional"):
+        """Add a global label with wire (or bus) stub.
+
+        (x, y) is the LABEL anchor. Stub goes LEFT for angle=0 and RIGHT
+        for angle=180. Text extends in the OPPOSITE direction (away from
+        the stub). Bus-named signals get a bus wire stub.
+        """
         x, y = snap(x), snap(y)
-        dx = STUB if angle == 180 else -STUB
+        dx = -STUB if angle == 0 else STUB
         lx = snap(x + dx)
         self._wires.append((min(x, lx), y, max(x, lx), y))
         self._elements.append(global_label(name, x, y, angle, shape))
+        # Text extends OPPOSITE the stub direction
+        self._register_label_fence(name, x, y, angle)
 
     def add_hlabel(self, name, x, y, angle, shape="input"):
         """Add a hierarchical label with wire stub."""
@@ -792,6 +996,7 @@ class SchematicBuilder:
         self._wires.append((min(x, lx), y, max(x, lx), y))
         self._hlabel_names[name].append((x, y))
         self._elements.append(hlabel(name, x, y, angle, shape))
+        self._register_label_fence(name, lx, y, angle)
 
     def register_pin(self, x, y, ref="", pin=""):
         """Register a component pin tip position for validation.
@@ -983,10 +1188,40 @@ class SchematicBuilder:
                     if bx1 < wx < bx2 and max(wy1, by1) < min(wy2, by2):
                         hit = True
                 if hit:
-                    # Exempt wires that connect to a pin of this component
+                    # Exempt wires that connect to a pin of this component,
+                    # but ONLY if the wire stays on the pin's side of the body.
+                    # A wire that enters at a pin and crosses through to the
+                    # opposite side is still wrong (crosses the IC body).
                     comp_pins = pins_by_ref.get(ref, set())
-                    if (x1, y1) in comp_pins or (x2, y2) in comp_pins:
+                    p1_is_pin = (x1, y1) in comp_pins
+                    p2_is_pin = (x2, y2) in comp_pins
+                    if p1_is_pin and p2_is_pin:
+                        # Both endpoints are pins of the SAME component.
+                        # This is a deliberate same-component connection
+                        # (e.g., tying two adjacent pins). Exempt unconditionally
+                        # — Recipe 5 governs same-component routing visually.
                         continue
+                    if p1_is_pin or p2_is_pin:
+                        # One endpoint is a pin, the other is something else
+                        # (a power symbol, net label, external component).
+                        # Exempt only if the wire stays on the pin's side of
+                        # the body center — otherwise it crosses through.
+                        TOL = 0.01
+                        bcx = (bx1 + bx2) / 2
+                        bcy = (by1 + by2) / 2
+                        if y1 == y2:  # horizontal wire
+                            other_x = x2 if p1_is_pin else x1
+                            pin_x = x1 if p1_is_pin else x2
+                            if (pin_x >= bcx - TOL and other_x >= bcx - TOL) or \
+                               (pin_x <= bcx + TOL and other_x <= bcx + TOL):
+                                continue
+                        else:  # vertical wire
+                            other_y = y2 if p1_is_pin else y1
+                            pin_y = y1 if p1_is_pin else y2
+                            if (pin_y >= bcy - TOL and other_y >= bcy - TOL) or \
+                               (pin_y <= bcy + TOL and other_y <= bcy + TOL):
+                                continue
+                        # Falls through: wire crosses the body center axis
                     key = (x1, y1, x2, y2, ref)
                     if key not in seen_body_hits:
                         seen_body_hits.add(key)
@@ -1053,23 +1288,64 @@ class SchematicBuilder:
                         f"inside fence of {bref} — move it outside the "
                         f"component area")
 
-        # --- 9. Nearby same-name net labels (prefer wire) ----------------
-        MAX_LABEL_WIRE_DIST = 50.0  # mm — Manhattan distance threshold
-        for name, positions in self._net_label_positions.items():
-            if len(positions) < 2:
-                continue
-            for i in range(len(positions)):
-                for j in range(i + 1, len(positions)):
-                    x1, y1 = positions[i]
-                    x2, y2 = positions[j]
-                    dist = abs(x2 - x1) + abs(y2 - y1)
-                    if dist <= MAX_LABEL_WIRE_DIST:
+        # --- 9. Label fence violations ---------------------------------
+        # Each net/h/global label gets a text bounding box. Nothing else
+        # may overlap that text region: not other labels, not wires (except
+        # the label's own stub), not component bodies.
+        TOL = 0.01
+        seen_label_hits = set()
+
+        # 9a. Label text boxes overlap each other
+        FENCE_TOL = 0.05
+        for i, (bx1, by1, bx2, by2, n1, ax1, ay1) in enumerate(self._label_fences):
+            for j, (cx1, cy1, cx2, cy2, n2, ax2, ay2) in enumerate(self._label_fences):
+                if i >= j:
+                    continue  # symmetric — only check each pair once
+                # Boxes overlap if they intersect in BOTH x and y
+                x_overlap = (max(bx1, cx1) + FENCE_TOL <
+                             min(bx2, cx2) - FENCE_TOL)
+                y_overlap = (max(by1, cy1) + FENCE_TOL <
+                             min(by2, cy2) - FENCE_TOL)
+                if x_overlap and y_overlap:
+                    key = tuple(sorted([(ax1, ay1, n1), (ax2, ay2, n2)]))
+                    if key not in seen_label_hits:
+                        seen_label_hits.add(key)
                         issues.append(
-                            f"WARNING: Net labels \"{name}\" at "
-                            f"({x1},{y1}) and ({x2},{y2}) are "
-                            f"{dist:.1f}mm apart (Manhattan) — "
-                            f"prefer a direct wire over net labels "
-                            f"for nearby connections")
+                            f"WARNING: Label '{n2}' at ({ax2},{ay2}) overlaps "
+                            f"text region of label '{n1}' at ({ax1},{ay1}) — "
+                            f"move one of them so their text boxes do not overlap")
+
+        # 9b. Wire passes through a label's text box (excluding the label's own stub)
+        # Use a small tolerance to compensate for fp error in fence boundary
+        # calculations (e.g. 54.61 - 1.27 = 53.33999... not exactly 53.34).
+        FENCE_TOL = 0.05
+        seen_wire_label_hits = set()
+        for x1, y1, x2, y2 in self._wires:
+            for bx1, by1, bx2, by2, name, ax, ay in self._label_fences:
+                # Exempt the label's own stub: it ends at (ax, ay)
+                if (x1, y1) == (ax, ay) or (x2, y2) == (ax, ay):
+                    continue
+                hit = False
+                if y1 == y2:  # horizontal
+                    wy = y1
+                    wx1, wx2 = min(x1, x2), max(x1, x2)
+                    if (by1 + FENCE_TOL < wy < by2 - FENCE_TOL and
+                        max(wx1, bx1) + FENCE_TOL < min(wx2, bx2) - FENCE_TOL):
+                        hit = True
+                elif x1 == x2:  # vertical
+                    wx = x1
+                    wy1, wy2 = min(y1, y2), max(y1, y2)
+                    if (bx1 + FENCE_TOL < wx < bx2 - FENCE_TOL and
+                        max(wy1, by1) + FENCE_TOL < min(wy2, by2) - FENCE_TOL):
+                        hit = True
+                if hit:
+                    key = (x1, y1, x2, y2, name, ax, ay)
+                    if key not in seen_wire_label_hits:
+                        seen_wire_label_hits.add(key)
+                        issues.append(
+                            f"WARNING: Wire ({x1},{y1})-({x2},{y2}) passes "
+                            f"through text region of label '{name}' at "
+                            f"({ax},{ay}) — reroute the wire or move the label")
 
         return issues
 
@@ -1213,12 +1489,16 @@ class SchematicBuilder:
 
     def assemble(self):
         """Assemble the complete schematic as a string."""
-        # lib_symbols section
-        lib_body = "\n".join(
-            "\n".join("\t\t" + line for line in entry.split("\n"))
-            for entry in self._lib_entries
-        )
-        lib_section = f"\t(lib_symbols\n{lib_body}\n\t)"
+        # lib_symbols section (empty if no lib entries — top-level sheets
+        # have only sheet boxes and global labels, no symbols)
+        if self._lib_entries:
+            lib_body = "\n".join(
+                "\n".join("\t\t" + line for line in entry.split("\n"))
+                for entry in self._lib_entries
+            )
+            lib_section = f"\t(lib_symbols\n{lib_body}\n\t)"
+        else:
+            lib_section = "\t(lib_symbols)"
 
         # Title block
         title_block = (
