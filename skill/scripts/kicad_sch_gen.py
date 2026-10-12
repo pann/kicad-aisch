@@ -76,6 +76,33 @@ _PASSIVE_PINS = {
 }
 
 
+# FM16 house-style constants (measured in FM16-hw-kicad/Power.kicad_sch)
+TITLE_SIZE = 2.286      # bold section titles
+NOTE_SIZE = 1.27        # note box text
+NOTE_MARGIN = 0.9525    # text_box margins
+NOTE_FILL = "255 255 150 1"
+LINE_PITCH = 1.62       # KiCad stroke-font interline, in font sizes
+CHAR_ADVANCE = 0.95     # advance of UPPERCASE/digit text in font sizes (measured 1.2 mm at 1.27);
+                        # prose is narrower, so boxes get a little slack rather than spilling
+PORT_PITCH = 5.08       # spacing of edge ports
+
+
+def _escape(text):
+    """Escape a string for a KiCad quoted token. KiCad escapes newlines as \\n;
+    backslashes and double quotes must be escaped too: an unescaped quote makes
+    KiCad load the whole sheet as empty at project level, with no error."""
+    return (text.replace('\\', '\\\\').replace('"', '\\"')
+            .replace('\n', '\\n'))
+
+
+def wrap_note(text, width, size=NOTE_SIZE):
+    """Word-wrap one paragraph to fit a note box of the given width (mm)."""
+    import textwrap
+    chars = max(10, int((width - 2 * NOTE_MARGIN) / (CHAR_ADVANCE * size)))
+    return textwrap.wrap(text, chars, break_long_words=False,
+                         break_on_hyphens=False) or [""]
+
+
 def snap(v, grid=GRID):
     """Snap a coordinate value to the nearest grid point (1.27mm = 50 mil)."""
     return round(round(v / grid) * grid, 4)
@@ -418,6 +445,7 @@ class SchematicBuilder:
         # The anchor (label position) is exempt from "wire endpoint inside fence"
         # since the label's own stub legitimately touches it.
         self._label_fences = []
+        self._note_boxes = []   # (x1, y1, x2, y2) of note boxes, for the overlap check
 
     @property
     def inst_path(self):
@@ -442,7 +470,8 @@ class SchematicBuilder:
             self._lib_entries.append(lib_sym_entry(lib_path, name, lib_prefix))
 
     def place_sym(self, lib_id, x, y, angle, ref, value, footprint, pin_nums,
-                  unit=1, in_bom="yes", exclude_sim="no", mirror=None):
+                  unit=1, in_bom="yes", exclude_sim="no", mirror=None,
+                  text_dx=0.0):
         """Place a component symbol instance.
 
         Args:
@@ -455,15 +484,17 @@ class SchematicBuilder:
             pin_nums:  List of pin number strings (e.g. ["1", "2"])
             unit:      Unit number for multi-unit symbols (default 1)
             mirror:    Mirror axis ("x" or "y") or None
+            text_dx:   Shift the reference and value text sideways, for symbols
+                       whose pins would otherwise run through it
         """
         x, y = snap(x), snap(y)
         path = self.inst_path
         p_ref = (f'\t\t(property "Reference" "{ref}"\n'
-                 f'\t\t\t(at {x} {y - 4} 0)\n'
+                 f'\t\t\t(at {snap(x + text_dx)} {y - 4} 0)\n'
                  f'\t\t\t(effects (font (size 1.27 1.27)))\n'
                  f'\t\t)')
         p_val = (f'\t\t(property "Value" "{value}"\n'
-                 f'\t\t\t(at {x} {y + 4} 0)\n'
+                 f'\t\t\t(at {snap(x + text_dx)} {y + 4} 0)\n'
                  f'\t\t\t(effects (font (size 1.27 1.27)))\n'
                  f'\t\t)')
         p_fp = (f'\t\t(property "Footprint" "{footprint}"\n'
@@ -524,9 +555,11 @@ class SchematicBuilder:
         else:
             # Unknown component: parse embedded lib_symbol to find pin positions
             # and auto-compute a generous fence from them.
-            self._auto_register_from_lib(lib_id, x, y, angle, ref, pin_nums)
+            self._auto_register_from_lib(lib_id, x, y, angle, ref, pin_nums,
+                                         mirror)
 
-    def _auto_register_from_lib(self, lib_id, x, y, angle, ref, pin_nums):
+    def _auto_register_from_lib(self, lib_id, x, y, angle, ref, pin_nums,
+                                mirror=None):
         """Parse embedded lib_symbols to find pin positions, register fence and pins.
 
         The fence is computed generously: from pin-tip to pin-tip plus 2.54mm
@@ -574,9 +607,12 @@ class SchematicBuilder:
             if angle == 90:    dx, dy = dy, -dx
             elif angle == 180: dx, dy = -dx, -dy
             elif angle == 270: dx, dy = -dy, dx
+            # KiCad mirrors after rotating: "y" flips left-right, "x" up-down
+            if mirror == "y":   dx = -dx
+            elif mirror == "x": dy = -dy
             self.register_pin(x + dx, y + dy, ref, pnum)
 
-    def place_power(self, net_name, x, y, angle=0):
+    def place_power(self, net_name, x, y, angle=0, lib="power"):
         """Place a power symbol with a wire stub from (x,y) to the symbol pin.
 
         (x,y) is the component pin tip. The stub direction depends on the net:
@@ -584,13 +620,16 @@ class SchematicBuilder:
         - Negative rails (-5V, -5VA, -6V, etc.): stub goes DOWN, arrow points down
         - Positive rails (+3V3, +5V, +5VA, etc.): stub goes UP, symbol above
         - PWR_FLAG: placed directly at (x,y), no stub
+
+        lib selects the library prefix, so project-local rail symbols
+        (e.g. "RadioBox_power") place the same way as the stock ones.
         """
         x, y = snap(x), snap(y)
         path = self.inst_path
         pwr_ref = f"#PWR{self._pwr_counter:04d}"
         self._pwr_counter += 1
 
-        lib_id = f"power:{net_name}"
+        lib_id = f"{lib}:{net_name}"
         if net_name == "PWR_FLAG":
             sx, sy = x, y
             sym_angle = angle
@@ -605,6 +644,10 @@ class SchematicBuilder:
             sx, sy = x, snap(y - STUB)
             sym_angle = angle
 
+        # Caption where the stock symbols carry it: GND below the glyph, rails and
+        # PWR_FLAG above the arrow (the old +2 mm landed on the GND glyph and on
+        # the rail stubs).
+        val_y = round(sy + 3.81, 4) if "GND" in net_name else round(sy - 3.81, 4)
         sym = (f'\t(symbol\n'
                f'\t\t(lib_id "{lib_id}")\n'
                f'\t\t(at {sx} {sy} {sym_angle})\n'
@@ -619,7 +662,7 @@ class SchematicBuilder:
                f'\t\t\t(effects (font (size 1.27 1.27)) (hide yes))\n'
                f'\t\t)\n'
                f'\t\t(property "Value" "{net_name}"\n'
-               f'\t\t\t(at {sx} {sy + 2} 0)\n'
+               f'\t\t\t(at {sx} {val_y} 0)\n'
                f'\t\t\t(effects (font (size 1.27 1.27)))\n'
                f'\t\t)\n'
                f'\t\t(property "Footprint" ""\n'
@@ -892,7 +935,7 @@ class SchematicBuilder:
         """Add a no-connect marker."""
         self._elements.append(no_connect(x, y))
 
-    def add_text(self, text, x, y, size=1.27, angle=0, justify="left"):
+    def add_text(self, text, x, y, size=1.27, angle=0, justify="left", bold=False):
         """Add a text annotation (graphical text, no electrical meaning).
 
         Use for documentation: equations, circuit notes, transfer functions.
@@ -904,22 +947,115 @@ class SchematicBuilder:
             size:    Font size in mm (default 1.27)
             angle:   Rotation in degrees (default 0)
             justify: "left", "center", or "right" (default "left")
+            bold:    Bold face (stroke thickness 0.2 x size, as KiCad's own bold)
         """
         x, y = snap(x), snap(y)
-        # KiCad escapes newlines as \n inside the text string
-        escaped = text.replace('\n', '\\n')
+        escaped = _escape(text)
+        font = f'(size {size} {size})'
+        if bold:
+            font += f' (thickness {round(size * 0.2, 4)}) (bold yes)'
         text_sexp = (
             f'\t(text "{escaped}"\n'
             f'\t\t(exclude_from_sim no)\n'
             f'\t\t(at {x} {y} {angle})\n'
             f'\t\t(effects\n'
-            f'\t\t\t(font (size {size} {size}))\n'
+            f'\t\t\t(font {font})\n'
             f'\t\t\t(justify {justify} bottom)\n'
             f'\t\t)\n'
             f'\t\t(uuid "{u()}")\n'
             f'\t)'
         )
         self._elements.append(text_sexp)
+
+    # ---- FM16 house style ---------------------------------------------
+    # The idioms below reproduce how the FM16 sheets are drawn (FM16-hw-kicad/
+    # Power.kicad_sch): bold 2.286 mm section titles, 0.508 mm divider lines
+    # between sections, yellow note boxes next to the circuit they describe, and
+    # the sheet's hierarchical ports lined up on the left (in) and right (out)
+    # edges with a local label carrying the signal to the circuit.
+
+    def add_title(self, text, x, y, size=TITLE_SIZE):
+        """Bold section title, FM16 style. (x, y) is the bottom-left corner."""
+        self.add_text(text, x, y, size=size, bold=True)
+
+    def add_divider(self, x1, y1, x2, y2, style="solid"):
+        """Thick section divider line (FM16: 0.508 mm, solid dark grey or dashed
+        black). Purely graphical."""
+        x1, y1, x2, y2 = snap(x1), snap(y1), snap(x2), snap(y2)
+        colour = "0 0 0 1" if style == "dash" else "67 67 67 1"
+        self._elements.append(
+            f'\t(polyline\n'
+            f'\t\t(pts\n'
+            f'\t\t\t(xy {x1} {y1}) (xy {x2} {y2})\n'
+            f'\t\t)\n'
+            f'\t\t(stroke (width 0.508) (type {style}) (color {colour}))\n'
+            f'\t\t(uuid "{u()}")\n'
+            f'\t)')
+
+    def add_note_box(self, text, x, y, width, size=NOTE_SIZE, wrap=True):
+        """Yellow note box, FM16 style. (x, y) is the TOP-LEFT corner.
+
+        Paragraphs are separated by \\n in `text`; each is word-wrapped to the box
+        width here (not left to KiCad, whose wrap point cannot be predicted when
+        sizing the box). The height follows from the line count. Returns
+        (x, y, width, height) so the caller can stack the next box below.
+        """
+        x, y = snap(x), snap(y)
+        lines = []
+        for para in text.split("\n"):
+            if wrap and para.strip():
+                lines.extend(wrap_note(para, width, size))
+            else:
+                lines.append(para)
+        height = round(len(lines) * size * LINE_PITCH + 2 * NOTE_MARGIN + 0.6, 3)
+        width = round(width, 3)
+        escaped = _escape("\n".join(lines))
+        self._elements.append(
+            f'\t(text_box "{escaped}"\n'
+            f'\t\t(exclude_from_sim no)\n'
+            f'\t\t(at {x} {y} 0)\n'
+            f'\t\t(size {width} {height})\n'
+            f'\t\t(margins {NOTE_MARGIN} {NOTE_MARGIN} {NOTE_MARGIN} {NOTE_MARGIN})\n'
+            f'\t\t(stroke (width 0) (type default) (color 0 0 0 1))\n'
+            f'\t\t(fill (type color) (color {NOTE_FILL}))\n'
+            f'\t\t(effects\n'
+            f'\t\t\t(font (size {size} {size}))\n'
+            f'\t\t\t(justify left top)\n'
+            f'\t\t)\n'
+            f'\t\t(uuid "{u()}")\n'
+            f'\t)')
+        self._note_boxes.append((x, y, x + width, y + height))
+        return x, y, width, height
+
+    def add_note_stack(self, notes, x, y, width, size=NOTE_SIZE, gap=2.54):
+        """Several note boxes stacked top-down from (x, y). Returns the y below
+        the last box."""
+        for n in notes:
+            _, by, _, bh = self.add_note_box(n, x, y, width, size)
+            y = snap(by + bh + gap)
+        return y
+
+    def add_ports(self, ports, side, x, y0, pitch=PORT_PITCH):
+        """Sheet ports lined up on one edge, FM16 style.
+
+        ports: [(name, shape), ...]. side: "left" (label text points off the
+        sheet to the left, signal enters rightwards) or "right". The hierarchical
+        label sits at the edge; a local net label of the same name sits on the
+        inner end of the stub and carries the signal to the circuit, where the
+        matching add_net_label() is placed at the pin. Returns {name: y}.
+        """
+        ys = {}
+        y = snap(y0)
+        for name, shape in ports:
+            if side == "left":
+                self.add_hlabel(name, x, y, 180, shape)      # stub x-STUB .. x
+                self.add_net_label(name, x, y, 0)            # stub x .. x+STUB
+            else:
+                self.add_hlabel(name, x, y, 0, shape)        # stub x .. x+STUB
+                self.add_net_label(name, x, y, 180)          # stub x-STUB .. x
+            ys[name] = y
+            y = snap(y + pitch)
+        return ys
 
     def _register_label_fence(self, name, lx, ly, angle, extra_chars=0):
         """Register a text bounding box around a label for fence validation.
