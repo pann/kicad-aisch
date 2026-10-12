@@ -345,12 +345,14 @@ SchematicBuilder(project_name, root_uuid, sheet_inst_uuid, sheet_uuid,
   - `lib_prefix`: e.g., `"Device"`, `"power"`, `"Connector"`, or project name for custom libs
 
 ### Component Placement
-- `sb.place_sym(lib_id, x, y, angle, ref, value, footprint, pin_nums, unit=1, mirror=None)`
+- `sb.place_sym(lib_id, x, y, angle, ref, value, footprint, pin_nums, unit=1, mirror=None, hide_ref=False, hide_val=False, val_inline=False)`
   - `lib_id`: Fully-qualified name, e.g., `"Device:R"`
-  - `angle`: 0, 90, 180, or 270
+  - `angle`: 0, 90, 180, or 270. Reference and Value text positions stay at `(cx, cy-4)` / `(cx, cy+4)` regardless of angle. **KiCad adds the symbol angle to each property's own angle** to compute the rendered text orientation, so to keep ref/val labels horizontal regardless of body rotation, `place_sym` writes the property angle as `(360 - symbol_angle) % 360` — e.g. for a horizontal R at angle=90, property angle 270 → rendered 90+270=360=0 (horizontal). Text reads left-to-right regardless of how the symbol is rotated.
   - `pin_nums`: List of pin number strings, e.g., `["1", "2"]`
   - `unit`: For multi-unit ICs (e.g., quad NAND gates)
   - `mirror`: `"x"` or `"y"` axis, or `None`
+  - `hide_ref` / `hide_val`: Suppress the Reference / Value text on the schematic (still in BOM/netlist). Use for dense columns of passives — e.g. a stack of disconnect Rs at 7.62 mm pair pitch — where the reference labels would visually collide with each other or with nearby net labels.
+  - `val_inline`: Place the Value text at the body centre rotated 90° (inside the body footprint) instead of at `(cx, cy+4)`. For horizontal Rs (angle 90/270) inline on a signal wire, the default cy+4 position puts the rotated value text vertically across the next signal wire below. `val_inline=True` keeps the value within the body's footprint — matches canonical KiCad practice for compact passive arrays.
 
 - `sb.place_power(net_name, x, y)` — Place power symbol with auto wire stub
   - GND variants: symbol placed at `y + 7.62` (below), stub wire down, arrow points down
@@ -810,13 +812,37 @@ kicad-cli sch erc --exit-code-violations <root>.kicad_sch
 ```
 Check for `multiple_net_names` (shorts) and `hier_label_mismatch` (hierarchy errors). These are **blockers**.
 
+**Level 4: Visual readability check with HONEST judgement**
+
+ERC-passing ≠ readable. A schematic that is electrically correct but visually crowded — overlapping labels, signals running through component bodies, adjacent component pitches with no breathing room, or labels that can't be read at normal zoom — is **not done**.
+
+For ANY larger edit (more than ~10 placed components, or any new sub-circuit):
+
+1. Render the affected sheet:
+   ```bash
+   kicad-cli sch export pdf --output /tmp/sch.pdf <root>.kicad_sch
+   gs -sDEVICE=pngalpha -r200 -dNOPAUSE -dBATCH -sOutputFile=/tmp/sch-p%d.png /tmp/sch.pdf
+   ```
+   (or use `kicad-cli sch export svg` + inkscape if you prefer SVG → PNG.)
+2. **Open the PNG and ask honestly:**
+   - Could a stranger trace each signal end-to-end without zooming?
+   - Do label texts overlap each other or the wires?
+   - Is there clear vertical space between adjacent horizontal signals (≥5 mm)?
+   - Are bus structures visually obvious (one signal bus, one GND bus, perpendicular drops)?
+3. **If the answer to any of those is no, the layout is not done.** Iterate spacing / placement until it reads cleanly, even though the netlist export already passes.
+4. When a hand-edited canonical exists for comparison, the readability bar is "as good as the hand-edit." Do not ship denser than the canonical.
+5. **Never report a larger-edit generator change as complete without rendering and visually evaluating the image.** "I'll let the user verify" is a cop-out — the user shouldn't have to point out unreadable layouts.
+
+This bit during the 2026-05-11 resistor-network rewrite: ERC passed, the netlist connection test passed, but the DB25 interface section was visibly denser than the user's canonical. I called it "functional but dense" instead of "needs more space" — the user's reaction was that it's unreadable. The lesson: **judge readability separately from correctness, and act on what the rendering shows, not on what the netlist says.**
+
 **Iterative workflow:**
 The schematic phase is iterative — changes trigger re-validation, which may reveal new issues, which require more changes. The cycle is:
 1. Make a change to a generator
 2. Run the generator → must be `[CLEAN]`
 3. Run full ERC → must have 0 errors
-4. If ERC fails, fix and repeat from step 1
-5. Only report the change as complete when all validators pass
+4. For larger edits, render to PNG and read it honestly (Level 4) → must be readable
+5. If any level fails, fix and repeat from step 1
+6. Only report the change as complete when all four levels pass
 
 **Never report a change as done if validation hasn't run.** If you modified `gen_power_supply.py`, you must show the `[CLEAN]` output AND the ERC result before moving on.
 
@@ -853,6 +879,19 @@ Re-run ALL generators and full-project ERC as the last step before generating re
 2. **Frame boxes** — use dashed rectangles around functional groups on complex sheets (power supply sections, relay blocks, etc.)
 3. **Signal name labels on key wires** — for critical internal signals (feedback nodes, sense outputs), add a net label even if the wire connects directly. This documents intent, not connectivity.
 4. **Symbol pin remap notes** — when a component symbol would benefit from pin rearrangement (like TPS562201 was remapped), note it in `07-schematics.md` under "Symbol Improvement Candidates". Do NOT edit symbols unless told to.
+5. **Visual layout readability is a separate gate from electrical correctness.** ERC clean + netlist clean ≠ readable. For any sub-circuit with more than ~10 placed components, render the sheet to PNG (see Validation Level 4) and judge it honestly — label crowding, signals running through component bodies, adjacent-pitch component shorts (visually merged columns), or dense areas where a stranger cannot trace a signal end-to-end all mean the layout is **not done**. If a hand-edited canonical exists, the bar is "as good as the canonical." Iterate spacing and placement, don't ship denser.
+
+6. **Never draw a wire between an inline 2-pin component's own pins.** The component IS the connection — adding a wire segment from pin1 to pin2 overlays the body visually AND electrically short-circuits the component (KiCad treats the wire as a parallel path, merging both pins into one net). For a horizontal disconnect R inline on a signal wire, the wire from the left ends at the R's left pin tip, the wire from the right starts at the R's right pin tip, and NO wire connects them — the R does. Verify in the netlist: a working inline 2-pin component has its two pins on TWO DIFFERENT nets when sitting between segments of a labeled signal (one side carries the label name, the other is auto-named like `Net-(R196-Pad2)`). If both pins are on the same net, the component is shorted.
+
+7. **Reference text collides on dense passive columns — hide it.** Adjacent 2-pin passives stacked at ≤ 7.62 mm pitch will have their Reference text labels overlap (default placement is 4 mm above/below the body, so R_k's "value" label at body_y + 4 collides with R_{k+1}'s "reference" label at body_{k+1}_y − 4 = body_y + 3.62). For a column of disconnect / Kelvin / decoupling passives where the reference designators don't add reading value, pass `hide_ref=True` to `place_sym`. The reference stays in the BOM/netlist, just isn't drawn. (The canonical KiCad workflow for tight passive arrays does this too — symbol Reference visibility is set off in the schematic library editor.)
+
+8. **Value text on horizontal Rs can cross the wire below — use `val_inline=True`.** A horizontal R (angle 90) inline on a signal wire has its Value at `(cx, cy+4)` by default. KiCad rotates the rendered text 90° (because the symbol is rotated), so the text reads vertically and extends ±~1.5 mm above/below its anchor. For a dense passive column where the next signal wire is only 2.54 mm below the R body, that vertical text overlaps the wire. `val_inline=True` moves the Value to body centre rotated 90° (inside the body footprint, where there's no wire). Pair with `hide_ref=True` for the cleanest dense-column look. Don't make this the global default — for mesh-style horizontal Rs (wide row pitch), the default `(cx, cy+4)` placement keeps the value in the inter-row gap where it's easy to read.
+
+9. **Always force ref/val text to display horizontal.** KiCad 9 adds the symbol angle and property angle to compute rendered text orientation. For a horizontal R at angle=90 with property angle=0, text renders at angle 90 (vertical, bottom-to-top) — visually noisy and prone to overlapping wires. `place_sym` compensates by setting property angle to `(360 - symbol_angle) % 360`, which makes the final rendered angle 0 (horizontal) for any symbol rotation. The EE convention is "all text readable from the bottom of the page" — this is what users expect and what hand-edited canonical schematics show.
+
+10. **Side-place ref/val for vertical-body passives + testpoints.** Default ref/val placement at `(cx, cy±4)` puts text DIRECTLY ON the wires for a vertical-body passive (e.g. a Device:R at angle=0 — wires enter top pin and exit bottom pin, both running through x=cx). Text-on-wire is visually noisy. For 2-pin passives at angle 0/180 AND for testpoints, `place_sym` side-places the labels: Reference at `(cx-5.08, cy-1.27)`, Value at `(cx-5.08, cy+1.27)`, both horizontal. The text sits in the same vertical band as the body but 5 mm to the LEFT — clear space. Horizontal-body passives (angle 90/270) keep the default above/below placement (the inter-row gap is clear of wires there).
+
+11. **Hide Value on testpoints.** A testpoint's `Value` field is boilerplate ("TP") that adds visual clutter near the test pad without useful information. The Reference designator (TP35, TP66, …) is the only meaningful identifier. Pass `hide_val=True` when calling `place_sym` for `Connector:TestPoint`.
 
 ---
 
