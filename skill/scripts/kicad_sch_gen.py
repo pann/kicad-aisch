@@ -363,7 +363,7 @@ def global_label(name, x, y, angle, shape="bidirectional"):
     return wire(min(x, lx), y, max(x, lx), y) + '\n' + label
 
 
-def hlabel(name, x, y, angle, shape="input"):
+def hlabel(name, x, y, angle, shape="input", stub=True):
     """Create a hierarchical label with a wire stub.
 
     x   = component pin tip (inner wire end).
@@ -383,6 +383,8 @@ def hlabel(name, x, y, angle, shape="input"):
              f'\t\t(effects (font (size 1.27 1.27)) (justify {just} bottom))\n'
              f'\t\t(uuid "{u()}")\n'
              f'\t)')
+    if not stub:
+        return label
     return wire(min(x, lx), y, max(x, lx), y) + '\n' + label
 
 
@@ -1035,27 +1037,55 @@ class SchematicBuilder:
             y = snap(by + bh + gap)
         return y
 
-    def add_ports(self, ports, side, x, y0, pitch=PORT_PITCH):
+    def add_ports(self, ports, side, x, y0, pitch=PORT_PITCH, stub_label=True):
         """Sheet ports lined up on one edge, FM16 style.
 
         ports: [(name, shape), ...]. side: "left" (label text points off the
         sheet to the left, signal enters rightwards) or "right". The hierarchical
-        label sits at the edge; a local net label of the same name sits on the
-        inner end of the stub and carries the signal to the circuit, where the
-        matching add_net_label() is placed at the pin. Returns {name: y}.
+        label sits at the edge with its stub and a same-named local label on the
+        stub's inner end; the circuit carries the matching add_net_label(). (KiCad
+        merges local and hierarchical labels of one name within a sheet, but ERC
+        flags a hierarchical label with no wire as dangling and a stub with an
+        open end as unconnected, so the stub label stays.) Prefer add_port_wire()
+        whenever the circuit can be reached by a wire. Returns {name: y}.
         """
         ys = {}
         y = snap(y0)
         for name, shape in ports:
             if side == "left":
-                self.add_hlabel(name, x, y, 180, shape)      # stub x-STUB .. x
-                self.add_net_label(name, x, y, 0)            # stub x .. x+STUB
+                self.add_hlabel(name, x, y, 180, shape, stub=stub_label)
+                if stub_label:
+                    self.add_net_label(name, x, y, 0)
             else:
-                self.add_hlabel(name, x, y, 0, shape)        # stub x .. x+STUB
-                self.add_net_label(name, x, y, 180)          # stub x-STUB .. x
+                self.add_hlabel(name, x, y, 0, shape, stub=stub_label)
+                if stub_label:
+                    self.add_net_label(name, x, y, 180)
             ys[name] = y
             y = snap(y + pitch)
         return ys
+
+    def add_port_wire(self, name, shape, side, x, y, target, via_x=None):
+        """A sheet port wired straight to the circuit: hierarchical label at the
+        edge (x, y), then a wire from the stub's inner end to `target` (tx, ty).
+        Same row: one straight wire. Otherwise horizontal to via_x (default: the
+        target's x), vertical to ty, horizontal to tx. Returns the inner end."""
+        angle = 180 if side == "left" else 0
+        self.add_hlabel(name, x, y, angle, shape)
+        x1, _, x2, _ = self._wires[-1]
+        x0 = max(x1, x2) if side == "left" else min(x1, x2)
+        tx, ty = snap(target[0]), snap(target[1])
+        y = snap(y)
+        if y == ty:
+            if x0 != tx:
+                self.add_wire(x0, y, tx, ty)
+        else:
+            vx = snap(via_x) if via_x is not None else tx
+            if vx != x0:
+                self.add_wire(x0, y, vx, y)
+            self.add_wire(vx, y, vx, ty)
+            if vx != tx:
+                self.add_wire(vx, ty, tx, ty)
+        return (x0, y)
 
     def _register_label_fence(self, name, lx, ly, angle, extra_chars=0):
         """Register a text bounding box around a label for fence validation.
@@ -1124,14 +1154,17 @@ class SchematicBuilder:
         # Text extends OPPOSITE the stub direction
         self._register_label_fence(name, x, y, angle)
 
-    def add_hlabel(self, name, x, y, angle, shape="input"):
-        """Add a hierarchical label with wire stub."""
+    def add_hlabel(self, name, x, y, angle, shape="input", stub=True):
+        """Add a hierarchical label, with a wire stub on its inner side unless
+        stub=False (a port that connects by name only; a stub with an open end
+        would be an ERC warning)."""
         x, y = snap(x), snap(y)
         dx = -STUB if angle == 180 else STUB
         lx = snap(x + dx)
-        self._wires.append((min(x, lx), y, max(x, lx), y))
+        if stub:
+            self._wires.append((min(x, lx), y, max(x, lx), y))
         self._hlabel_names[name].append((x, y))
-        self._elements.append(hlabel(name, x, y, angle, shape))
+        self._elements.append(hlabel(name, x, y, angle, shape, stub=stub))
         self._register_label_fence(name, lx, y, angle)
 
     def register_pin(self, x, y, ref="", pin=""):
